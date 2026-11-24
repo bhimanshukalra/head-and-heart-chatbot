@@ -18,7 +18,13 @@ from head_and_heart.nodes.classifier import (
     DEFAULT_TYPE,
     make_classifier,
 )
+from head_and_heart.nodes.safety import make_crisis_response, make_safety_check
 from head_and_heart.state import State
+
+
+def route_after_safety(state: State) -> Literal["crisis_response", "classifier"]:
+    """Short-circuit to the fixed crisis reply when the safety check flags the message."""
+    return "crisis_response" if state.get("safety") == "crisis" else "classifier"
 
 
 def route(state: State) -> Literal["therapist", "logical", "blended"]:
@@ -37,11 +43,15 @@ def build_graph(
     therapist_llm: BaseChatModel,
     logical_llm: BaseChatModel,
     blended_llm: BaseChatModel | None = None,
+    safety_llm: BaseChatModel | None = None,
+    crisis_region: str = "US",
     checkpointer: BaseCheckpointSaver[Any] | None = None,
     max_context_tokens: int = DEFAULT_MAX_CONTEXT_TOKENS,
     confidence_threshold: float = DEFAULT_CONFIDENCE_THRESHOLD,
 ) -> CompiledStateGraph[State, None, State, State]:
     builder = StateGraph(State)
+    builder.add_node("safety_check", make_safety_check(safety_llm or classifier_llm))  # type: ignore[call-overload]
+    builder.add_node("crisis_response", make_crisis_response(crisis_region))  # type: ignore[call-overload]
     builder.add_node("classifier", make_classifier(classifier_llm, confidence_threshold))  # type: ignore[call-overload]
     builder.add_node("therapist", make_therapist(therapist_llm, max_context_tokens))  # type: ignore[call-overload]
     builder.add_node(
@@ -50,7 +60,13 @@ def build_graph(
     )
     builder.add_node("logical", make_logical(logical_llm, max_context_tokens))  # type: ignore[call-overload]
 
-    builder.add_edge(START, "classifier")
+    builder.add_edge(START, "safety_check")
+    builder.add_conditional_edges(
+        "safety_check",
+        route_after_safety,
+        {"crisis_response": "crisis_response", "classifier": "classifier"},
+    )
+    builder.add_edge("crisis_response", END)
     builder.add_conditional_edges(
         "classifier", route, {"therapist": "therapist", "logical": "logical", "blended": "blended"}
     )

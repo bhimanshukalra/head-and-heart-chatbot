@@ -106,11 +106,11 @@ head-and-heart-chatbot/
 - [x] Add a short disclaimer that the bot is not a licensed therapist (first turn / on request). _(printed once at the start of a new CLI thread, plus a prompt rule to say so when asked.)_
 
 ### Phase 4 — Safety & compliance
-- [ ] `safety_check` node: self-harm, suicide, abuse, medical emergency detection.
-- [ ] Crisis response template with region-appropriate resources (e.g. 988 in US, configurable), no LLM improvisation on the critical path.
-- [ ] Input length limit and basic prompt-injection hygiene (treat user text as data; never let it alter system prompts).
-- [ ] PII handling: redact in logs; documented retention policy for stored conversations; make persistence opt-in/deletable.
-- [ ] Review Anthropic usage policies for mental-health-adjacent products.
+- [x] `safety_check` node: self-harm, suicide, abuse, medical emergency detection.
+- [x] Crisis response template with region-appropriate resources (e.g. 988 in US, configurable), no LLM improvisation on the critical path. _(see `crisis.py`; hotline numbers must be verified per region before launch.)_
+- [x] Input length limit and basic prompt-injection hygiene (treat user text as data; never let it alter system prompts). _(prompt rules + 4000-char limit; regex/LLM guardrails are not injection-proof.)_
+- [x] PII handling: redact in logs; documented retention policy for stored conversations; make persistence opt-in/deletable. _(log redaction, opt-in persistence via `PERSIST_HISTORY`, `--delete-thread`; policy in `docs/privacy.md`.)_
+- [ ] Review Groq usage policies for mental-health-adjacent products. _(manual task, not done; checklist in `docs/privacy.md`.)_
 
 ### Phase 5 — Observability & serving
 - [ ] Structured JSON logging with `thread_id`, node name, latency, token usage (no raw message content at INFO).

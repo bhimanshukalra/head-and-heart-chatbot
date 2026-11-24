@@ -119,3 +119,32 @@ def test_sqlite_checkpoint_persists_across_graph_instances(
         out = g.invoke({"messages": [HumanMessage(text)]}, cfg)
         assert len(out["messages"]) == expected
         conn.close()
+
+
+def test_crisis_short_circuits_to_fixed_reply(
+    make_classifier_llm: Any, make_agent_llm: Any
+) -> None:
+    g = _graph(make_classifier_llm("logical"), make_agent_llm, crisis_region="US")
+    out = g.invoke({"messages": [HumanMessage("I want to kill myself")]})
+    assert out["safety"] == "crisis"
+    assert "988" in out["messages"][-1].text
+    assert "message_type" not in out  # classifier never ran
+
+
+def test_crisis_reply_is_streamed(make_classifier_llm: Any, make_agent_llm: Any) -> None:
+    from head_and_heart.chat import stream_reply
+
+    g = _graph(make_classifier_llm("logical"), make_agent_llm, checkpointer=MemorySaver())
+    cfg: RunnableConfig = {"configurable": {"thread_id": "crisis1"}}
+    assert "988" in "".join(stream_reply(g, "I want to kill myself", cfg))
+
+
+def test_next_turn_after_crisis_is_checked_again(
+    make_classifier_llm: Any, make_agent_llm: Any
+) -> None:
+    g = _graph(make_classifier_llm("logical"), make_agent_llm, checkpointer=MemorySaver())
+    cfg: RunnableConfig = {"configurable": {"thread_id": "crisis2"}}
+    g.invoke({"messages": [HumanMessage("I want to kill myself")]}, cfg)
+    out = g.invoke({"messages": [HumanMessage("what is 2+2?")]}, cfg)
+    assert out["safety"] == "ok"
+    assert out["messages"][-1].text == "LOGICAL"

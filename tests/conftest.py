@@ -42,3 +42,15 @@ def make_agent_llm() -> Any:
         return GenericFakeChatModel(messages=iter([AIMessage(text) for _ in range(10)]))
 
     return _make
+
+
+@pytest.fixture
+def make_safety_llm() -> Any:
+    from head_and_heart.schemas import SafetyAssessment
+
+    def _make(category: str | Exception) -> FakeClassifierLLM:
+        if isinstance(category, Exception):
+            return FakeClassifierLLM(category)
+        return FakeClassifierLLM(SafetyAssessment(category=category))
+
+    return _make

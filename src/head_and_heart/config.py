@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     classifier_confidence_threshold: float = Field(
         default=0.6, ge=0, le=1, description="Below this, a message is treated as 'mixed'."
     )
+    crisis_region: str = Field(default="US", description="Region code for crisis resources.")
+    max_input_chars: int = Field(default=4000, gt=0, description="Longest accepted user message.")
+    persist_history: bool = Field(
+        default=False, description="Opt in to storing conversations in SQLite."
+    )
     checkpoint_db_path: str = Field(default="chat_history.sqlite", description="SQLite file.")
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
