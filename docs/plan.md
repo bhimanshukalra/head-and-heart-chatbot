@@ -134,6 +134,39 @@ head-and-heart-chatbot/
 
 ---
 
+### Phase 8 — Live validation (blocks the `v0.1.0` tag)
+Everything so far is tested against fake models only. This phase needs a real `GROQ_API_KEY`.
+- [ ] Confirm the Groq model IDs in `.env.example` exist, and that the classifier model supports structured output.
+- [ ] Smoke test the CLI: one emotional, one logical, one mixed and one crisis message. Check reply quality, streaming and the logged `Low confidence` / `Classification failed` lines.
+- [ ] Run `pytest -m eval tests/evals/test_classifier_eval.py -s`; review the confusion matrix and misclassified rows; tune the prompt, the confidence threshold or the dataset labels.
+- [ ] Verify every hotline number in `crisis.py` for the supported regions.
+- [ ] Review Groq's usage, data-retention and acceptable-use policies for mental-health-adjacent use (see `docs/privacy.md`).
+- [ ] Confirm the first GitHub Actions run passes (pinned action versions, coverage gate); add the `GROQ_API_KEY` repo secret for `eval.yml`.
+- [ ] `docker build .`, run the container and confirm the health check.
+- [ ] Tag `v0.1.0`: bump the version, move the changelog entries out of `[Unreleased]`.
+
+### Phase 9 — Demo UI (Streamlit)
+A thin front end for demos and internal testing. It is not the production UI: Streamlit re-runs the script on every interaction and does not isolate users.
+- [ ] Add `streamlit` as an optional dependency group (not in the core install).
+- [ ] `demo/app.py`: chat box with streaming, calling the existing `/chat` SSE endpoint (preferred, so auth, rate limits and safety all apply) or the graph directly.
+- [ ] Show the not-a-therapist disclaimer, show crisis replies clearly, and keep conversations in memory only (no persistence by default).
+- [ ] Per-session `thread_id` in `st.session_state`; a "New conversation" button that calls `DELETE /threads/{id}`.
+- [ ] Optional debug panel (off by default) showing the route taken and the classifier confidence, never raw logs.
+- [ ] README section: how to run it locally; note that it must not be exposed publicly as-is.
+
+### Phase 10 — Hardening for real users (later)
+Known limitations from the earlier phases, to pick up once Phase 8 passes and there is a real audience.
+- [ ] Multi-instance support: shared rate limiting (Redis or a gateway) and Postgres checkpointing instead of SQLite.
+- [ ] Authenticate or network-restrict `/metrics`; add CORS configuration for browser clients.
+- [ ] Broaden the safety patterns: slang, misspellings and other languages, driven by new cases in `tests/evals/safety_dataset.jsonl`.
+- [ ] Data retention: automatic expiry of stored conversations, and optional encryption at rest.
+- [ ] Native async nodes (`ainvoke`) so API concurrency does not depend on worker threads.
+- [ ] Optional rolling summary of older turns instead of dropping them.
+- [ ] Cost per conversation (token counts times per-model prices) as a metric.
+- [ ] Prompt-injection red-team cases added to the eval set.
+
+---
+
 ## 4. Key design decisions (to confirm)
 
 | Decision | Recommendation | Alternatives |
@@ -161,3 +194,4 @@ head-and-heart-chatbot/
 2. Phase 6 (tests for what exists) → locks in behavior before adding features.
 3. Phase 2 → Phase 3 → Phase 4 (safety before any public exposure).
 4. Phase 5 → Phase 7.
+5. Phase 8 (live validation) next, then tag `v0.1.0`; Phase 9 (demo UI) and Phase 10 (hardening) after that.
