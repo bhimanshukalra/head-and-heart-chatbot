@@ -99,11 +99,11 @@ head-and-heart-chatbot/
 - [ ] Use async (`ainvoke`/`astream`) in service path. _(deferred to Phase 5.)_
 
 ### Phase 3 — Quality of routing & responses
-- [ ] Add `mixed` class + confidence; blended agent (empathize first, then practical steps).
-- [ ] Give classifier recent context (last 2–3 turns), not just the last message ("yes, exactly" is unclassifiable alone).
-- [ ] Move prompts to `prompts.py`; version them; add few-shot examples to classifier.
-- [ ] Soften the "purely logical / no emotions" prompt so it stays polite and doesn't ignore clear distress.
-- [ ] Add a short disclaimer that the bot is not a licensed therapist (first turn / on request).
+- [x] Add `mixed` class + confidence; blended agent (empathize first, then practical steps). _(low confidence or classifier failure now falls back to `mixed`, not `logical`.)_
+- [x] Give classifier recent context (last 2–3 turns), not just the last message ("yes, exactly" is unclassifiable alone).
+- [x] Move prompts to `prompts.py`; version them; add few-shot examples to classifier. _(prompts versioned via `PROMPT_VERSION`; few-shot examples added.)_
+- [x] Soften the "purely logical / no emotions" prompt so it stays polite and doesn't ignore clear distress.
+- [x] Add a short disclaimer that the bot is not a licensed therapist (first turn / on request). _(printed once at the start of a new CLI thread, plus a prompt rule to say so when asked.)_
 
 ### Phase 4 — Safety & compliance
 - [ ] `safety_check` node: self-harm, suicide, abuse, medical emergency detection.

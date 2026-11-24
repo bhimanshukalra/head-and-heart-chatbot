@@ -14,6 +14,10 @@ from head_and_heart.graph import build_graph
 from head_and_heart.llm import get_chat_model
 
 EXIT_COMMANDS = {"exit", "quit"}
+DISCLAIMER = (
+    "Note: this is an AI assistant, not a licensed therapist or medical professional. "
+    "If you are in crisis, please contact local emergency services or a crisis line."
+)
 logger = logging.getLogger(__name__)
 
 
@@ -35,10 +39,14 @@ def main() -> None:
         ),
         therapist_llm=get_chat_model(settings, model_name=settings.model_name, temperature=0.7),
         logical_llm=get_chat_model(settings, model_name=settings.model_name, temperature=0.2),
+        blended_llm=get_chat_model(settings, model_name=settings.model_name, temperature=0.5),
         checkpointer=SqliteSaver(conn),
         max_context_tokens=settings.max_context_tokens,
+        confidence_threshold=settings.classifier_confidence_threshold,
     )
     thread_id = args.thread_id or str(uuid.uuid4())
+    if not args.thread_id:
+        print(DISCLAIMER)
     config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
     print(f"Thread: {thread_id} (resume with --thread-id)")
 

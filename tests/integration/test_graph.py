@@ -12,6 +12,7 @@ def _graph(classifier: Any, make_agent_llm: Any, **kw: Any) -> Any:
         classifier_llm=classifier,
         therapist_llm=make_agent_llm("THERAPIST"),
         logical_llm=make_agent_llm("LOGICAL"),
+        blended_llm=make_agent_llm("BLENDED"),
         **kw,
     )
 
@@ -29,13 +30,37 @@ def test_logical_routes_to_logical(make_classifier_llm: Any, make_agent_llm: Any
     assert out["messages"][-1].text == "LOGICAL"
 
 
-def test_classifier_failure_defaults_to_logical(
+def test_classifier_failure_defaults_to_blended(
     make_classifier_llm: Any, make_agent_llm: Any
 ) -> None:
     g = _graph(make_classifier_llm(RuntimeError("api down")), make_agent_llm)
     out = g.invoke({"messages": [HumanMessage("hello")]})
-    assert out["message_type"] == "logical"
-    assert out["messages"][-1].text == "LOGICAL"
+    assert out["message_type"] == "mixed"
+    assert out["messages"][-1].text == "BLENDED"
+
+
+def test_mixed_routes_to_blended(make_classifier_llm: Any, make_agent_llm: Any) -> None:
+    g = _graph(make_classifier_llm("mixed"), make_agent_llm)
+    out = g.invoke({"messages": [HumanMessage("I'm stressed, how do I study?")]})
+    assert out["messages"][-1].text == "BLENDED"
+
+
+def test_low_confidence_routes_to_blended(make_classifier_llm: Any, make_agent_llm: Any) -> None:
+    g = _graph(make_classifier_llm("logical", confidence=0.3), make_agent_llm)
+    out = g.invoke({"messages": [HumanMessage("hmm")]})
+    assert out["message_type"] == "mixed"
+    assert out["messages"][-1].text == "BLENDED"
+
+
+def test_classifier_sees_recent_context(make_classifier_llm: Any, make_agent_llm: Any) -> None:
+    clf = make_classifier_llm("emotional")
+    g = _graph(clf, make_agent_llm, checkpointer=MemorySaver())
+    cfg: RunnableConfig = {"configurable": {"thread_id": "c1"}}
+    g.invoke({"messages": [HumanMessage("I feel lonely")]}, cfg)
+    g.invoke({"messages": [HumanMessage("yes, exactly")]}, cfg)
+    transcript = clf.last_input[-1].content
+    assert "I feel lonely" in transcript
+    assert "LATEST User: yes, exactly" in transcript
 
 
 def test_history_is_kept_across_turns(make_classifier_llm: Any, make_agent_llm: Any) -> None:

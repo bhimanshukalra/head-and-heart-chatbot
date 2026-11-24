@@ -6,7 +6,7 @@ from typing import Any
 from langchain_core.messages import AIMessageChunk, HumanMessage
 from langchain_core.runnables import RunnableConfig
 
-AGENT_NODES = {"therapist", "logical"}
+AGENT_NODES = {"therapist", "logical", "blended"}
 
 
 def stream_reply(graph: Any, user_text: str, config: RunnableConfig) -> Iterator[str]:

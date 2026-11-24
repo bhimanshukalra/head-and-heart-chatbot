@@ -12,11 +12,13 @@ class FakeClassifierLLM:
 
     def __init__(self, result: Any) -> None:
         self.result = result
+        self.last_input: list[Any] = []
 
     def with_structured_output(self, schema: type) -> "FakeClassifierLLM":
         return self
 
     def invoke(self, messages: list[Any]) -> Any:
+        self.last_input = messages
         if isinstance(self.result, Exception):
             raise self.result
         return self.result
@@ -24,10 +26,12 @@ class FakeClassifierLLM:
 
 @pytest.fixture
 def make_classifier_llm() -> Any:
-    def _make(message_type: str | Exception) -> FakeClassifierLLM:
+    def _make(message_type: str | Exception, confidence: float = 0.95) -> FakeClassifierLLM:
         if isinstance(message_type, Exception):
             return FakeClassifierLLM(message_type)
-        return FakeClassifierLLM(MessageClassifier(message_type=message_type))
+        return FakeClassifierLLM(
+            MessageClassifier(message_type=message_type, confidence=confidence)
+        )
 
     return _make
 

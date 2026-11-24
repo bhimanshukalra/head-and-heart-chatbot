@@ -7,7 +7,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, SystemMessage, trim_messages
 from langchain_core.messages.utils import count_tokens_approximately
 
-from head_and_heart.prompts import LOGICAL_PROMPT, THERAPIST_PROMPT
+from head_and_heart.prompts import BLENDED_PROMPT, LOGICAL_PROMPT, THERAPIST_PROMPT
 from head_and_heart.state import State
 
 DEFAULT_MAX_CONTEXT_TOKENS = 6000
@@ -44,3 +44,9 @@ def make_logical(
     llm: BaseChatModel, max_tokens: int = DEFAULT_MAX_CONTEXT_TOKENS
 ) -> Callable[[State], dict[str, Any]]:
     return _make_agent(llm, LOGICAL_PROMPT, max_tokens)
+
+
+def make_blended(
+    llm: BaseChatModel, max_tokens: int = DEFAULT_MAX_CONTEXT_TOKENS
+) -> Callable[[State], dict[str, Any]]:
+    return _make_agent(llm, BLENDED_PROMPT, max_tokens)
