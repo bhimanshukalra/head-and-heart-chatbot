@@ -7,12 +7,12 @@ nothing here has been exercised against a live deployment yet.
 
 Do these once, then tag `0.1.0` and move the `[Unreleased]` changelog entries under it.
 
-1. Confirm the Groq model IDs in `.env.example` exist and that the classifier model supports
-   structured output. Run the CLI with a real key and try an emotional, a logical and a mixed
-   message.
-2. Run `pytest -m eval tests/evals/test_classifier_eval.py -s`. Review the confusion matrix and
-   the misclassified list, and adjust the prompt or the dataset labels if the labels were wrong.
-3. Verify every hotline number in `src/head_and_heart/crisis.py` for the regions you support.
+1. ~~Confirm the Groq model IDs and structured output.~~ Done 2026-11-24: the original Llama IDs
+   were retired; defaults are now `openai/gpt-oss-120b` and `openai/gpt-oss-20b`. Re-check this
+   after any long gap, since Groq changes its lineup.
+2. ~~Run the classifier eval.~~ Done 2026-11-24: 116/116. Treat that as a smoke test; a harder,
+   independently labeled set is still worth building.
+3. ~~Verify hotline numbers.~~ Done 2026-11-24 against official sources for US, CA, UK, IN and AU.
 4. Read Groq's current terms, data retention and acceptable-use policies for mental-health use.
 5. `docker build .` and run the container with the health check.
 6. Push and confirm both GitHub workflows pass (add a `GROQ_API_KEY` repository secret first).

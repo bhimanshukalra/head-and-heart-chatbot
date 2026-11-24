@@ -20,7 +20,7 @@ from head_and_heart.observability import (
 
 def test_get_chat_model_builds_groq_model_from_settings() -> None:
     settings = Settings(_env_file=None, groq_api_key="x", max_retries=5)
-    model = get_chat_model(settings, model_name="llama-3.3-70b-versatile", temperature=0.3)
+    model = get_chat_model(settings, model_name="openai/gpt-oss-120b", temperature=0.3)
     assert isinstance(model, ChatGroq)
     assert model.temperature == 0.3
     assert model.max_retries == 5

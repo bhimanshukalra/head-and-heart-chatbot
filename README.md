@@ -4,9 +4,10 @@ A LangGraph chatbot that decides whether a message needs a **heart** response (e
 or a **head** response (facts and practical help), or both, and routes it to the right agent. It
 ships as a CLI and as a streaming HTTP API, with safety checks for crisis messages.
 
-> **Status: pre-release (0.1.0, unreleased).** The code is tested against fake models. It has
-> **not** been run against the live Groq API yet, the classifier eval has never run, the Docker
-> image has never been built, and the GitHub workflows have never run. See
+> **Status: pre-release (0.1.0, unreleased).** Checked against the live Groq API on 2026-11-24:
+> model IDs, structured output, the full graph on sample messages, and a 116-message classifier
+> eval. Not yet done: the Docker image has never been built, the weekly eval workflow has no API
+> key secret, and the Groq policy review is outstanding. See
 > [Known limitations](#known-limitations) before relying on it.
 
 > **Not a clinical product.** This is an AI assistant, not a licensed therapist or a medical
@@ -67,8 +68,8 @@ CLI. Missing or invalid values fail at startup.
 |----------|---------|---------|
 | `GROQ_API_KEY` | required | Groq API key |
 | `LLM_PROVIDER` | `groq` | LLM backend (only `groq` is supported) |
-| `MODEL_NAME` | `llama-3.3-70b-versatile` | Model for the response agents |
-| `CLASSIFIER_MODEL_NAME` | `llama-3.1-8b-instant` | Model for classification and safety checks |
+| `MODEL_NAME` | `openai/gpt-oss-120b` | Model for the response agents |
+| `CLASSIFIER_MODEL_NAME` | `openai/gpt-oss-20b` | Model for classification and safety checks |
 | `REQUEST_TIMEOUT_S` / `MAX_RETRIES` | `30` / `3` | Per-request timeout and the client's built-in retries |
 | `MAX_CONTEXT_TOKENS` | `6000` | Approximate history budget sent to a model |
 | `CLASSIFIER_CONFIDENCE_THRESHOLD` | `0.6` | Below this, a message is treated as `mixed` |
@@ -81,8 +82,10 @@ CLI. Missing or invalid values fail at startup.
 | `API_AUTH_DISABLED` | `false` | Local development only |
 | `RATE_LIMIT_PER_MINUTE` | `20` | Per-user limit on `/chat` |
 
-The model IDs are defaults chosen from memory and have not been checked against Groq's current
-model list. Confirm them, and that the classifier model supports structured output, before use.
+Groq changes its model lineup often: the Llama IDs this project first used had already been
+retired by 2026-11-24, when `openai/gpt-oss-120b` and `openai/gpt-oss-20b` were confirmed available
+and working with structured output. If calls start failing with a "model not found" error, list the
+current models and update `MODEL_NAME` and `CLASSIFIER_MODEL_NAME`.
 
 ## HTTP API
 
@@ -171,16 +174,22 @@ docs/             plan.md, privacy.md, runbook.md
   LLM, and a failed check assumes a crisis.
 - The regex covers common English phrasing only. Slang, misspellings and other languages can slip
   past it.
-- Hotline numbers in `src/head_and_heart/crisis.py` were written from memory. **Verify them for
-  every region you support before launch.**
+- Hotline numbers in `src/head_and_heart/crisis.py` were checked against official sources on
+  2026-11-24. Re-check them periodically and before adding a region.
+- The LLM confirmation step leans cautious. On live runs it flagged "How much paracetamol is an
+  overdose?", "I have chest pain when I run" and "Write a story about an abusive relationship" as
+  crises, so expect some unnecessary crisis replies on informational messages.
 - User text is treated as data in every prompt, but prompt injection is reduced, not prevented.
 - Stored conversations are unencrypted plain text. Message text goes to Groq. Read
   [docs/privacy.md](docs/privacy.md) and Groq's terms before any public launch.
 
 ## Known limitations
 
-- Never run against live Groq. Model IDs, structured output and classifier accuracy are unverified.
-- Docker image unbuilt. GitHub workflows unrun (they need a `GROQ_API_KEY` repo secret).
+- The classifier eval scores 100% (116 messages), but the labels are the author's own and the
+  model agrees with all of them, so it shows the set is easy, not that real traffic will score
+  100%. Have someone else label a harder set.
+- Replies were read on only a handful of messages. Review reply quality across more cases.
+- Docker image unbuilt. The weekly eval workflow needs a `GROQ_API_KEY` repo secret.
 - Rate limiting is per process. `/metrics` is unauthenticated. No CORS configuration.
 - Agent nodes are synchronous, so the API runs model calls in worker threads.
 - No automatic data retention or expiry.

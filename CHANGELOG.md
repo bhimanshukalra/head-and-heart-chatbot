@@ -27,11 +27,15 @@ runbook's "Before the first release" list pass.**
   `message_type` and `confidence` when `debug` is requested).
 
 ### Changed
-- Provider is Groq (`langchain-groq`) instead of Anthropic.
+- Provider is Groq (`langchain-groq`) instead of Anthropic. Region aliases (`GB`, `IND`, ...) are
+  accepted for `CRISIS_REGION`.
 - Classifier failures and low-confidence results route to the blended agent instead of the logical one.
 - Persistence is opt-in (`PERSIST_HISTORY`); conversations are in memory by default.
 
 ### Fixed
+- Default model IDs (`llama-3.3-70b-versatile`, `llama-3.1-8b-instant`) no longer exist on Groq;
+  defaults are now `openai/gpt-oss-120b` and `openai/gpt-oss-20b` (verified live).
+- The live classifier eval did not read `.env`, so it skipped even with a key configured.
 - Agents saw only the latest message, so they had no memory of earlier turns.
 - The router was a dummy node writing a state key that did not exist; it is now a conditional edge.
 - A classifier error crashed the whole chat loop.
@@ -39,6 +43,7 @@ runbook's "Before the first release" list pass.**
 - Safety patterns missed "hurting/harming myself" and curly apostrophes.
 
 ### Known issues
-- Not yet validated against the live Groq API (model IDs, structured output, classifier accuracy).
-- Docker image and GitHub workflows have never run.
-- Hotline numbers in `crisis.py` are unverified.
+- Docker image has never been built; the weekly eval workflow needs a `GROQ_API_KEY` secret.
+- Groq policy review is outstanding.
+- The live safety confirmation errs toward crisis replies on some informational messages.
+- The classifier eval scores 100%, which mainly shows the labeled set is easy.

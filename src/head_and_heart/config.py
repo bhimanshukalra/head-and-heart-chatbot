@@ -20,10 +20,10 @@ class Settings(BaseSettings):
     llm_provider: Literal["groq"] = Field(default="groq", description="LLM backend.")
     groq_api_key: SecretStr = Field(..., description="Groq API key.")
     model_name: str = Field(
-        default="llama-3.3-70b-versatile", description="Model used for the response agents."
+        default="openai/gpt-oss-120b", description="Model used for the response agents."
     )
     classifier_model_name: str = Field(
-        default="llama-3.1-8b-instant", description="Cheaper model used for classification."
+        default="openai/gpt-oss-20b", description="Cheaper model used for classification."
     )
     request_timeout_s: float = Field(default=30.0, gt=0)
     max_retries: int = Field(default=3, ge=0)

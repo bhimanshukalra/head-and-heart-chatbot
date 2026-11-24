@@ -135,14 +135,14 @@ head-and-heart-chatbot/
 ---
 
 ### Phase 8 — Live validation (blocks the `v0.1.0` tag)
-Everything so far is tested against fake models only. This phase needs a real `GROQ_API_KEY`.
-- [ ] Confirm the Groq model IDs in `.env.example` exist, and that the classifier model supports structured output.
-- [ ] Smoke test the CLI: one emotional, one logical, one mixed and one crisis message. Check reply quality, streaming and the logged `Low confidence` / `Classification failed` lines.
-- [ ] Run `pytest -m eval tests/evals/test_classifier_eval.py -s`; review the confusion matrix and misclassified rows; tune the prompt, the confidence threshold or the dataset labels.
-- [ ] Verify every hotline number in `crisis.py` for the supported regions.
-- [ ] Review Groq's usage, data-retention and acceptable-use policies for mental-health-adjacent use (see `docs/privacy.md`).
-- [ ] Confirm the first GitHub Actions run passes (pinned action versions, coverage gate); add the `GROQ_API_KEY` repo secret for `eval.yml`.
-- [ ] `docker build .`, run the container and confirm the health check.
+Everything before this phase was tested against fake models only. This phase used a real `GROQ_API_KEY` (checked 2026-11-24).
+- [x] Confirm the Groq model IDs in `.env.example` exist, and that the classifier model supports structured output. _(The original Llama IDs had been retired; defaults are now `openai/gpt-oss-120b` / `openai/gpt-oss-20b`; structured output works.)_
+- [x] Smoke test the graph: one emotional, one logical, one mixed and one crisis message. _(All four routed correctly, 1–3 s per reply. The ambiguous-safety LLM check leans toward crisis replies, e.g. "Write a story about an abusive relationship" and "How much paracetamol is an overdose?" were flagged.)_
+- [x] Run `pytest -m eval tests/evals/test_classifier_eval.py -s`; review the confusion matrix and misclassified rows. _(116/116, including 16 harder cases. The labels are mine and the model agrees with all of them, so the set is easy; an independently labeled, harder set is still worth building.)_
+- [x] Verify every hotline number in `crisis.py` for the supported regions. _(US, CA, UK, IN, AU checked against official sites; 999 and 112 were not searched separately.)_
+- [ ] Review Groq's usage, data-retention and acceptable-use policies for mental-health-adjacent use (see `docs/privacy.md`). _(Manual; not done.)_
+- [ ] Add the `GROQ_API_KEY` repo secret so `eval.yml` can run. _(CI itself passes on every push; the secret is yours to add.)_
+- [ ] `docker build .`, run the container and confirm the health check. _(Not done: the Docker daemon was not running.)_
 - [ ] Tag `v0.1.0`: bump the version, move the changelog entries out of `[Unreleased]`.
 
 ### Phase 9 — Demo UI (Streamlit)

@@ -1,6 +1,9 @@
 """Fixed crisis responses. No LLM is involved, so wording is vetted and predictable.
 
-Verify every number below for your target regions before production use.
+Numbers were checked against official sources on 2026-11-24 (988lifeline.org, 988.ca,
+samaritans.org, telemanas / PIB, lifeline.org.au, thehotline.org). The emergency numbers
+(911, 999, 112, 000) are the standard national ones. Re-check them periodically and before
+adding a region.
 """
 
 from head_and_heart.state import CrisisCategory
@@ -13,6 +16,7 @@ SELF_HARM_LINES: dict[str, tuple[str, str]] = {
     "IN": ("call Tele-MANAS on 14416", "112"),
     "AU": ("call Lifeline on 13 11 14", "000"),
 }
+REGION_ALIASES = {"GB": "UK", "IND": "IN", "AUS": "AU", "USA": "US", "CAN": "CA"}
 GENERIC_LINE = "find a local helpline at https://findahelpline.com"
 GENERIC_EMERGENCY = "your local emergency number"
 
@@ -37,12 +41,13 @@ _LEAD: dict[CrisisCategory, str] = {
 
 def crisis_message(category: CrisisCategory, region: str = "US") -> str:
     """Build the fixed crisis reply for a category and region."""
-    line, emergency = SELF_HARM_LINES.get(region.upper(), (GENERIC_LINE, GENERIC_EMERGENCY))
+    region = REGION_ALIASES.get(region.upper(), region.upper())
+    line, emergency = SELF_HARM_LINES.get(region, (GENERIC_LINE, GENERIC_EMERGENCY))
     lead = _LEAD[category]
     if category == "medical_emergency":
         action = f"Please call {emergency} now, or ask someone nearby to help you."
     elif category == "abuse":
-        hotline = DOMESTIC_ABUSE_LINES.get(region.upper(), "a local domestic violence hotline")
+        hotline = DOMESTIC_ABUSE_LINES.get(region, "a local domestic violence hotline")
         action = f"If you are in immediate danger, call {emergency}. You can also reach {hotline}."
     else:
         action = (

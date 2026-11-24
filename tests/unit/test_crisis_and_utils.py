@@ -30,3 +30,8 @@ def test_redact_masks_pii() -> None:
     assert "bob@example.com" not in out
     assert "555" not in out
     assert "123456789012" not in out
+
+
+def test_common_region_aliases_resolve() -> None:
+    assert "116 123" in crisis_message("self_harm", "GB")
+    assert "14416" in crisis_message("self_harm", "IND")

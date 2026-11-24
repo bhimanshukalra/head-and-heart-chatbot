@@ -98,3 +98,19 @@
 {"text": "makes sense, and how do I fix the formula?", "label": "logical", "context": [{"role": "user", "content": "My spreadsheet total is wrong."}, {"role": "assistant", "content": "Check whether the range includes all rows."}]}
 {"text": "I guess I just miss her", "label": "emotional", "context": [{"role": "user", "content": "It's been a year since my grandmother died."}, {"role": "assistant", "content": "A year can feel both long and short. How are you doing today?"}]}
 {"text": "any tips on how to cope and also get my work done?", "label": "mixed", "context": [{"role": "user", "content": "I'm having a really hard time since the breakup."}, {"role": "assistant", "content": "I'm sorry you're going through that."}]}
+{"text": "Why do I feel so tired after eating? Is it a blood sugar thing?", "label": "logical"}
+{"text": "What is the usual half-life of sertraline?", "label": "logical"}
+{"text": "Can you explain the stages of grief in the Kübler-Ross model?", "label": "logical"}
+{"text": "Is it normal to cry during movies? I'm looking for statistics.", "label": "logical"}
+{"text": "¿Cuál es la capital de Francia?", "label": "logical"}
+{"text": "Why does everything feel so pointless lately?", "label": "emotional"}
+{"text": "Do you think I'm a bad person for leaving my family?", "label": "emotional"}
+{"text": "What's wrong with me?", "label": "emotional"}
+{"text": "Is it okay to feel relieved after my breakup?", "label": "emotional"}
+{"text": "Me siento muy solo desde que me mudé.", "label": "emotional"}
+{"text": "My manager humiliated me today. Should I report it to HR?", "label": "mixed"}
+{"text": "I'm sick of feeling like this. How do therapists usually treat anxiety?", "label": "mixed"}
+{"text": "I lost my job today and I'm numb. What benefits can I claim?", "label": "mixed"}
+{"text": "I'm so embarrassed that I failed. Can you recheck my math: 12*13?", "label": "mixed"}
+{"text": "fine, whatever", "label": "emotional", "context": [{"role": "user", "content": "I got passed over for the promotion again."}, {"role": "assistant", "content": "That sounds really frustrating. How are you feeling about it?"}]}
+{"text": "never mind, just give me the steps", "label": "logical", "context": [{"role": "user", "content": "I'm worried about filing my taxes."}, {"role": "assistant", "content": "That sounds stressful. What part is worrying you most?"}]}

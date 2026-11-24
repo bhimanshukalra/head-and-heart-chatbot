@@ -9,6 +9,7 @@ from collections import Counter
 from typing import Any
 
 import pytest
+from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage
 
 from head_and_heart.config import Settings
@@ -33,6 +34,7 @@ def prf(confusion: Counter[tuple[str, str]], label: str) -> tuple[float, float, 
 
 
 def test_classifier_accuracy(capsys: pytest.CaptureFixture[str]) -> None:
+    load_dotenv()  # pick up GROQ_API_KEY from .env as the app does
     if not os.environ.get("GROQ_API_KEY"):
         pytest.skip("GROQ_API_KEY is not set")
     settings = Settings(_env_file=None)
