@@ -6,7 +6,7 @@ samaritans.org, telemanas / PIB, lifeline.org.au, thehotline.org). The emergency
 adding a region.
 """
 
-from head_and_heart.state import CrisisCategory
+from head_and_heart.state import CrisisCategory, Language
 
 # region -> (crisis/suicide line, emergency number)
 SELF_HARM_LINES: dict[str, tuple[str, str]] = {
@@ -39,9 +39,57 @@ _LEAD: dict[CrisisCategory, str] = {
 }
 
 
-def crisis_message(category: CrisisCategory, region: str = "US") -> str:
-    """Build the fixed crisis reply for a category and region."""
+_LEAD_ES: dict[CrisisCategory, str] = {
+    "self_harm": (
+        "Lamento mucho que estés pasando por esto, y me alegra que me lo hayas contado. "
+        "Mereces apoyo ahora mismo; soy una IA y no puedo ser la ayuda que necesitas."
+    ),
+    "abuse": (
+        "Lamento mucho que esto esté pasando. Lo que describes es grave y mereces estar a salvo. "
+        "Soy una IA y no puedo intervenir, pero otras personas sí."
+    ),
+    "medical_emergency": (
+        "Esto podría ser una emergencia médica. Soy una IA y no puedo ayudarte en persona."
+    ),
+}
+_US_LINE_ES = "llama o envía un mensaje de texto al 988 (oprime 2 para español)"
+_GENERIC_LINE_ES = "busca una línea de ayuda local en https://findahelpline.com"
+_GENERIC_EMERGENCY_ES = "tu número local de emergencias"
+
+
+def _crisis_message_es(category: CrisisCategory, region: str) -> str:
+    _, emergency = SELF_HARM_LINES.get(region, (GENERIC_LINE, GENERIC_EMERGENCY))
+    if emergency == GENERIC_EMERGENCY:
+        emergency = _GENERIC_EMERGENCY_ES
+    lead = _LEAD_ES[category]
+    if category == "medical_emergency":
+        action = f"Llama ahora al {emergency}, o pide ayuda a alguien cercano."
+    elif category == "abuse":
+        hotline = (
+            "la Línea Nacional de Violencia Doméstica de EE. UU. (1-800-799-7233)"
+            if region == "US"
+            else "una línea local de violencia doméstica"
+        )
+        action = (
+            f"Si estás en peligro inmediato, llama al {emergency}. "
+            f"También puedes contactar a {hotline}."
+        )
+    else:
+        line = _US_LINE_ES if region == "US" else _GENERIC_LINE_ES
+        action = (
+            f"Busca ayuda ahora mismo: {line}. "
+            "Si podrías actuar según estos pensamientos o estás en peligro inmediato, "
+            f"llama al {emergency}. "
+            "Si puedes, cuéntaselo a alguien de confianza para no estar solo o sola."
+        )
+    return f"{lead}\n\n{action}"
+
+
+def crisis_message(category: CrisisCategory, region: str = "US", lang: Language = "en") -> str:
+    """Build the fixed crisis reply for a category, region and language."""
     region = REGION_ALIASES.get(region.upper(), region.upper())
+    if lang == "es":
+        return _crisis_message_es(category, region)
     line, emergency = SELF_HARM_LINES.get(region, (GENERIC_LINE, GENERIC_EMERGENCY))
     lead = _LEAD[category]
     if category == "medical_emergency":

@@ -5,6 +5,7 @@ import logging
 import sqlite3
 import uuid
 from contextlib import closing
+from datetime import timedelta
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import InMemorySaver
@@ -14,6 +15,7 @@ from head_and_heart.chat import InputTooLongError, stream_reply, validate_input
 from head_and_heart.config import Settings, get_settings
 from head_and_heart.graph import build_default_graph
 from head_and_heart.logging import configure_logging, thread_id_var
+from head_and_heart.storage import make_serde, purge_idle_threads
 
 EXIT_COMMANDS = {"exit", "quit"}
 DISCLAIMER = (
@@ -27,6 +29,12 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="head-and-heart")
     parser.add_argument("--thread-id", help="Resume a stored conversation (needs PERSIST_HISTORY).")
     parser.add_argument("--delete-thread", metavar="ID", help="Delete a stored conversation.")
+    parser.add_argument(
+        "--purge-older-than",
+        type=int,
+        metavar="DAYS",
+        help="Delete stored conversations idle for more than DAYS days, then exit.",
+    )
     return parser.parse_args()
 
 
@@ -34,6 +42,13 @@ def delete_thread(settings: Settings, thread_id: str) -> None:
     with closing(sqlite3.connect(settings.checkpoint_db_path)) as conn:
         SqliteSaver(conn).delete_thread(thread_id)
     print(f"Deleted thread {thread_id}.")
+
+
+def purge_old(settings: Settings, days: int) -> int:
+    with closing(sqlite3.connect(settings.checkpoint_db_path)) as conn:
+        return purge_idle_threads(
+            SqliteSaver(conn, serde=make_serde(settings)), timedelta(days=days)
+        )
 
 
 def main() -> None:
@@ -44,6 +59,9 @@ def main() -> None:
     if args.delete_thread:
         delete_thread(settings, args.delete_thread)
         return
+    if args.purge_older_than is not None:
+        print(f"Deleted {purge_old(settings, args.purge_older_than)} idle conversations.")
+        return
     if args.thread_id and not settings.persist_history:
         raise SystemExit("--thread-id requires PERSIST_HISTORY=true.")
 
@@ -52,7 +70,12 @@ def main() -> None:
         if settings.persist_history
         else None
     )
-    graph = build_default_graph(settings, SqliteSaver(conn) if conn else InMemorySaver())
+    if conn and settings.retention_days > 0:
+        saver = SqliteSaver(conn, serde=make_serde(settings))
+        purge_idle_threads(saver, timedelta(days=settings.retention_days))
+    graph = build_default_graph(
+        settings, SqliteSaver(conn, serde=make_serde(settings)) if conn else InMemorySaver()
+    )
     thread_id = args.thread_id or str(uuid.uuid4())
     config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
     thread_id_var.set(thread_id)

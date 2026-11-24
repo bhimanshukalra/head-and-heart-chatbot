@@ -14,7 +14,14 @@ _LONG_NUMBER = re.compile(r"\b\d{9,}\b")
 thread_id_var: ContextVar[str | None] = ContextVar("thread_id", default=None)
 
 # Structured fields that callers may attach with `extra=`.
-EXTRA_FIELDS = ("node", "latency_ms", "input_tokens", "output_tokens", "outcome")
+EXTRA_FIELDS = (
+    "node",
+    "latency_ms",
+    "input_tokens",
+    "output_tokens",
+    "cost_usd",
+    "outcome",
+)
 
 
 def redact(text: str) -> str:

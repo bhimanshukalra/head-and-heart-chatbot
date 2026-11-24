@@ -148,3 +148,10 @@ def test_next_turn_after_crisis_is_checked_again(
     out = g.invoke({"messages": [HumanMessage("what is 2+2?")]}, cfg)
     assert out["safety"] == "ok"
     assert out["messages"][-1].text == "LOGICAL"
+
+
+def test_spanish_crisis_gets_a_spanish_reply(make_classifier_llm: Any, make_agent_llm: Any) -> None:
+    g = _graph(make_classifier_llm("logical"), make_agent_llm, crisis_region="US")
+    out = g.invoke({"messages": [HumanMessage("Quiero morir")]})
+    assert out["crisis_lang"] == "es"
+    assert "Lamento" in out["messages"][-1].text

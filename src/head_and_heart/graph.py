@@ -22,7 +22,7 @@ from head_and_heart.nodes.classifier import (
     make_classifier,
 )
 from head_and_heart.nodes.safety import make_crisis_response, make_safety_check
-from head_and_heart.observability import instrument
+from head_and_heart.observability import configure_pricing, instrument
 from head_and_heart.state import State
 
 
@@ -85,6 +85,7 @@ def build_default_graph(
     settings: Settings, checkpointer: BaseCheckpointSaver[Any]
 ) -> CompiledStateGraph[State, None, State, State]:
     """Build the production graph with Groq models taken from settings."""
+    configure_pricing(settings.model_prices)
     return build_graph(
         classifier_llm=get_chat_model(
             settings, model_name=settings.classifier_model_name, temperature=0

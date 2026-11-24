@@ -35,3 +35,12 @@ def test_redact_masks_pii() -> None:
 def test_common_region_aliases_resolve() -> None:
     assert "116 123" in crisis_message("self_harm", "GB")
     assert "14416" in crisis_message("self_harm", "IND")
+
+
+def test_spanish_reply_is_in_spanish_with_the_right_numbers() -> None:
+    msg = crisis_message("self_harm", "US", "es")
+    assert "988" in msg and "español" in msg
+    assert "Lamento" in msg
+    assert "999" in crisis_message("medical_emergency", "UK", "es")
+    assert "1-800-799-7233" in crisis_message("abuse", "US", "es")
+    assert "tu número local de emergencias" in crisis_message("medical_emergency", "ZZ", "es")

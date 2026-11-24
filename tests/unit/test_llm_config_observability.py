@@ -82,3 +82,47 @@ def test_instrument_counts_and_reraises_errors() -> None:
     with pytest.raises(RuntimeError):
         instrument("boom_node", boom)({})
     assert NODE_ERRORS.labels("boom_node")._value.get() == before + 1
+
+
+def test_parse_prices_handles_slashes_and_rejects_garbage() -> None:
+    from head_and_heart.observability import parse_prices
+
+    assert parse_prices("openai/gpt-oss-120b:0.15:0.60, m2:1:2") == {
+        "openai/gpt-oss-120b": (0.15, 0.60),
+        "m2": (1.0, 2.0),
+    }
+    assert parse_prices("") == {}
+    for bad in ("model:x:y", "nocolons", ":1:2"):
+        with pytest.raises(ValueError):
+            parse_prices(bad)
+
+
+def test_cost_is_computed_from_tokens_and_model_prices() -> None:
+    from head_and_heart.observability import LLM_COST, configure_pricing
+
+    configure_pricing("test-model:2:10")
+    msg = AIMessage(
+        "x",
+        usage_metadata={
+            "input_tokens": 1_000_000,
+            "output_tokens": 500_000,
+            "total_tokens": 1_500_000,
+        },
+        response_metadata={"model_name": "test-model"},
+    )
+    before = LLM_COST.labels("costnode")._value.get()
+    instrument("costnode", lambda s: {"messages": [msg]})({})
+    assert LLM_COST.labels("costnode")._value.get() == pytest.approx(before + 7.0)
+    configure_pricing("")  # restore global state
+
+
+def test_unknown_model_costs_nothing() -> None:
+    from head_and_heart.observability import _usage, configure_pricing
+
+    configure_pricing("")
+    msg = AIMessage(
+        "x",
+        usage_metadata={"input_tokens": 10, "output_tokens": 5, "total_tokens": 15},
+        response_metadata={"model_name": "unpriced"},
+    )
+    assert _usage({"messages": [msg]}) == (10, 5, 0.0)

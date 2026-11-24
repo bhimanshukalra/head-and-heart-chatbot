@@ -57,6 +57,7 @@ Type `exit` or `quit` to leave. By default the conversation is **not saved**. To
 PERSIST_HISTORY=true uv run head-and-heart                 # prints a thread id
 PERSIST_HISTORY=true uv run head-and-heart --thread-id <id>      # resume
 PERSIST_HISTORY=true uv run head-and-heart --delete-thread <id>  # delete
+PERSIST_HISTORY=true uv run head-and-heart --purge-older-than 30 # delete idle 30+ days
 ```
 
 ## Configuration
@@ -75,12 +76,18 @@ CLI. Missing or invalid values fail at startup.
 | `CLASSIFIER_CONFIDENCE_THRESHOLD` | `0.6` | Below this, a message is treated as `mixed` |
 | `CRISIS_REGION` | `US` | Region for hotline details (`US`, `CA`, `UK`, `IN`, `AU`, else generic) |
 | `MAX_INPUT_CHARS` | `4000` | Longest accepted message |
-| `PERSIST_HISTORY` | `false` | Store conversations in SQLite (unencrypted) |
+| `PERSIST_HISTORY` | `false` | Store conversations in SQLite |
+| `CHECKPOINT_ENCRYPTION_KEY` | empty | 16, 24 or 32 byte key; encrypts stored conversations (AES) |
+| `RETENTION_DAYS` | `0` | Delete conversations idle this many days; `0` keeps them. Also bounds memory when not persisting |
+| `RETENTION_CHECK_INTERVAL_S` | `3600` | How often the API runs the expiry sweep |
 | `CHECKPOINT_DB_PATH` | `chat_history.sqlite` | SQLite file when persisting |
 | `LOG_LEVEL` / `LOG_FORMAT` | `INFO` / `text` | `LOG_FORMAT=json` for structured logs |
 | `API_KEYS` | empty | HTTP API keys as `user:key,user2:key2` |
 | `API_AUTH_DISABLED` | `false` | Local development only |
 | `RATE_LIMIT_PER_MINUTE` | `20` | Per-user limit on `/chat` |
+| `METRICS_TOKEN` | empty | If set, `/metrics` needs `Authorization: Bearer <token>` |
+| `CORS_ALLOW_ORIGINS` | empty | Comma-separated browser origins allowed to call the API (none by default) |
+| `MODEL_PRICES` | empty | USD per 1M tokens, `model:input:output,...`; enables `llm_cost_usd_total` |
 
 Groq changes its model lineup often: the Llama IDs this project first used had already been
 retired by 2026-11-24, when `openai/gpt-oss-120b` and `openai/gpt-oss-20b` were confirmed available
@@ -98,7 +105,7 @@ API_KEYS="alice:$(openssl rand -hex 24)" uv run uvicorn head_and_heart.api:app_f
 | `POST /chat` | Body `{"message": "...", "thread_id": "optional"}`. Streams Server-Sent Events: `token` (`{"text"}`), then `meta` (`{"crisis": bool}`) and `done` (`{"thread_id"}`), or `error`. Add `"debug": true` to also get `message_type` and `confidence` in `meta`. Needs `X-API-Key`. |
 | `DELETE /threads/{thread_id}` | Deletes that user's stored thread. Needs `X-API-Key`. |
 | `GET /health` | Liveness. No auth. |
-| `GET /metrics` | Prometheus metrics. No auth, so restrict it at the network level. |
+| `GET /metrics` | Prometheus metrics. Open unless `METRICS_TOKEN` is set, so set it or restrict it at the network level. |
 
 ```bash
 curl -N -X POST localhost:8000/chat \
@@ -177,15 +184,19 @@ docs/             plan.md, privacy.md, runbook.md
 
 - Explicit crisis statements get a fixed reply with no LLM. Ambiguous ones are confirmed by an
   LLM, and a failed check assumes a crisis.
-- The regex covers common English phrasing only. Slang, misspellings and other languages can slip
-  past it.
+- The regex covers common English and Spanish phrasing, some slang and some misspellings, and a
+  Spanish message gets a Spanish reply. Other languages, heavy slang and unusual spellings can
+  still slip past it. Add a case to `tests/evals/safety_dataset.jsonl` before changing a pattern.
 - Hotline numbers in `src/head_and_heart/crisis.py` were checked against official sources on
   2026-11-24. Re-check them periodically and before adding a region.
 - The LLM confirmation step leans cautious. On live runs it flagged "How much paracetamol is an
   overdose?", "I have chest pain when I run" and "Write a story about an abusive relationship" as
   crises, so expect some unnecessary crisis replies on informational messages.
-- User text is treated as data in every prompt, but prompt injection is reduced, not prevented.
-- Stored conversations are unencrypted plain text. Message text goes to Groq. Read
+- User text is treated as data in every prompt, but prompt injection is reduced, not prevented. A
+  10-case red-team set (`tests/evals/injection_dataset.jsonl`) passed on live runs, after one
+  prompt-extraction case initially leaked the system prompt and the wording was tightened.
+- Stored conversations are plain text unless `CHECKPOINT_ENCRYPTION_KEY` is set (then AES-encrypted
+  in the database; losing the key loses the history). Message text goes to Groq. Read
   [docs/privacy.md](docs/privacy.md) and Groq's terms before any public launch.
 
 ## Known limitations
@@ -194,8 +205,10 @@ docs/             plan.md, privacy.md, runbook.md
   model agrees with all of them, so it shows the set is easy, not that real traffic will score
   100%. Have someone else label a harder set.
 - Replies were read on only a handful of messages. Review reply quality across more cases.
-- Rate limiting is per process. `/metrics` is unauthenticated. No CORS configuration.
+- Rate limiting is per process and conversations live in one SQLite file, so run a single instance
+  (shared rate limiting and Postgres are not built).
 - Agent nodes are synchronous, so the API runs model calls in worker threads.
-- No automatic data retention or expiry.
+- Retention is off by default (`RETENTION_DAYS=0`), and the expiry sweep scans every checkpoint, so
+  it is not built for very large databases.
 
 See [CHANGELOG.md](CHANGELOG.md) for history and [docs/runbook.md](docs/runbook.md) for operations.

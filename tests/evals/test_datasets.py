@@ -71,7 +71,11 @@ def _check(llm: Any, text: str) -> dict[str, Any]:
 )
 def test_explicit_crisis_statements_are_caught_without_llm(row: dict[str, Any]) -> None:
     out = _check(_NoLLM(), row["text"])
-    assert out == {"safety": "crisis", "crisis_category": row["category"]}
+    assert out == {
+        "safety": "crisis",
+        "crisis_category": row["category"],
+        "crisis_lang": row.get("lang", "en"),
+    }
 
 
 @pytest.mark.parametrize(

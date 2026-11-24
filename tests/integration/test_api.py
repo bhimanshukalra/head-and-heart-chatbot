@@ -190,3 +190,61 @@ def test_debug_flag_adds_routing_details(make_client: Any) -> None:
     meta = dict(_events(r.text))["meta"]
     assert meta["message_type"] == "logical"
     assert meta["confidence"] == 0.95
+
+
+def test_metrics_open_by_default_and_protected_with_token(make_client: Any) -> None:
+    with make_client() as c:
+        assert c.get("/metrics").status_code == 200
+    with make_client(metrics_token="s3cret") as c:
+        assert c.get("/metrics").status_code == 401
+        assert c.get("/metrics", headers={"Authorization": "Bearer nope"}).status_code == 401
+        assert c.get("/metrics", headers={"Authorization": "Bearer s3cret"}).status_code == 200
+
+
+def test_cors_allows_only_configured_origins(make_client: Any) -> None:
+    preflight = {
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "x-api-key",
+    }
+    with make_client(cors_allow_origins="https://app.example.com/") as c:
+        ok = c.options("/chat", headers={"Origin": "https://app.example.com", **preflight})
+        bad = c.options("/chat", headers={"Origin": "https://evil.example.com", **preflight})
+    assert ok.headers["access-control-allow-origin"] == "https://app.example.com"
+    assert "access-control-allow-origin" not in bad.headers
+
+
+def test_no_cors_headers_when_unconfigured(make_client: Any) -> None:
+    with make_client() as c:
+        r = c.get("/health", headers={"Origin": "https://app.example.com"})
+    assert "access-control-allow-origin" not in r.headers
+
+
+def test_encrypted_persistent_lifespan_and_retention_loop(
+    tmp_path: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    make_classifier_llm: Any,
+    make_agent_llm: Any,
+) -> None:
+    from head_and_heart import api
+
+    monkeypatch.setattr(
+        api,
+        "build_default_graph",
+        lambda settings, saver: build_graph(
+            classifier_llm=make_classifier_llm("logical"),
+            therapist_llm=make_agent_llm("THERAPIST"),
+            logical_llm=make_agent_llm("LOGICAL"),
+            checkpointer=saver,
+        ),
+    )
+    db = tmp_path / "enc.sqlite"
+    settings = _settings(
+        persist_history=True,
+        checkpoint_db_path=str(db),
+        checkpoint_encryption_key="k" * 32,
+        retention_days=30,
+    )
+    with TestClient(create_app(settings)) as c:
+        r = c.post("/chat", json={"message": "my-very-private-sentence"}, headers=HEADERS_A)
+        assert "LOGICAL" in r.text
+    assert b"my-very-private-sentence" not in db.read_bytes()

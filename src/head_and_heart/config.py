@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import Literal
 
 from dotenv import load_dotenv
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -47,8 +47,39 @@ class Settings(BaseSettings):
         default=False, description="Only for local development: disables API key auth."
     )
     rate_limit_per_minute: int = Field(default=20, gt=0)
+    metrics_token: SecretStr = Field(
+        default=SecretStr(""),
+        description="If set, /metrics requires 'Authorization: Bearer <token>'.",
+    )
+    cors_allow_origins: str = Field(
+        default="", description="Comma-separated browser origins allowed to call the API."
+    )
+    model_prices: str = Field(
+        default="",
+        description="USD per 1M tokens as 'model:input:output,...'. Empty disables cost metrics.",
+    )
+    retention_days: int = Field(
+        default=0, ge=0, description="Delete conversations idle for this many days. 0 keeps all."
+    )
+    retention_check_interval_s: int = Field(default=3600, gt=0)
+    checkpoint_encryption_key: SecretStr = Field(
+        default=SecretStr(""),
+        description="16, 24 or 32 byte key to encrypt stored conversations (AES). Empty = off.",
+    )
+
+    @field_validator("checkpoint_encryption_key")
+    @classmethod
+    def _validate_key(cls, key: SecretStr) -> SecretStr:
+        return _check_key(key)
+
     checkpoint_db_path: str = Field(default="chat_history.sqlite", description="SQLite file.")
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+
+
+def _check_key(key: SecretStr) -> SecretStr:
+    if key.get_secret_value() and len(key.get_secret_value().encode()) not in (16, 24, 32):
+        raise ValueError("CHECKPOINT_ENCRYPTION_KEY must be 16, 24 or 32 bytes long.")
+    return key
 
 
 @lru_cache

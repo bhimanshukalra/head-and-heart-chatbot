@@ -24,7 +24,7 @@ def _run(llm: Any, text: str) -> dict[str, Any]:
 def test_strong_patterns_skip_the_llm(make_safety_llm: Any, text: str, category: str) -> None:
     # An LLM that raises proves the LLM was never consulted.
     out = _run(make_safety_llm(AssertionError("LLM must not be called")), text)
-    assert out == {"safety": "crisis", "crisis_category": category}
+    assert (out["safety"], out["crisis_category"]) == ("crisis", category)
 
 
 @pytest.mark.parametrize(
@@ -42,9 +42,9 @@ def test_weak_match_cleared_by_llm(make_safety_llm: Any) -> None:
 
 def test_weak_match_confirmed_by_llm(make_safety_llm: Any) -> None:
     out = _run(make_safety_llm("self_harm"), "I feel hopeless and nothing matters")
-    assert out == {"safety": "crisis", "crisis_category": "self_harm"}
+    assert (out["safety"], out["crisis_category"]) == ("crisis", "self_harm")
 
 
 def test_weak_match_fails_safe_when_llm_errors(make_safety_llm: Any) -> None:
     out = _run(make_safety_llm(RuntimeError("down")), "I have chest pain")
-    assert out == {"safety": "crisis", "crisis_category": "medical_emergency"}
+    assert (out["safety"], out["crisis_category"]) == ("crisis", "medical_emergency")

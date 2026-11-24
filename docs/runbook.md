@@ -39,8 +39,13 @@ Useful Prometheus queries (scrape `/metrics`):
 | Crisis replies | `sum by (category) (increase(crisis_triggers_total[1d]))` |
 | Token use | `sum by (node, direction) (rate(llm_tokens_total[1h]))` |
 | Request outcomes | `sum by (outcome) (rate(chat_requests_total[5m]))` |
+| Spend per hour (needs `MODEL_PRICES`) | `sum(increase(llm_cost_usd_total[1h]))` |
+| Average cost per answered chat | `sum(increase(llm_cost_usd_total[1h])) / sum(increase(chat_requests_total{outcome="ok"}[1h]))` |
 
-Token counts are only recorded for agent nodes. Cost per conversation is not computed.
+Token counts and cost are only recorded for agent nodes. Cost needs `MODEL_PRICES` set to the
+prices you pay (the model name must match what Groq reports); without it only tokens are counted.
+There is no per-conversation series, to avoid one time series per user. Use the average above.
+Scrape `/metrics` with `authorization: {credentials: <METRICS_TOKEN>}` when the token is set.
 
 ## Tracing (optional)
 

@@ -154,16 +154,17 @@ A thin front end for demos and internal testing. It is not the production UI: St
 - [x] Optional debug panel (off by default) showing the route taken and the classifier confidence, never raw logs. _(debug panel uses the new `debug` request flag.)_
 - [x] README section: how to run it locally; note that it must not be exposed publicly as-is. _(only tested headlessly with Streamlit's AppTest; not viewed in a browser.)_
 
-### Phase 10 — Hardening for real users (later)
-Known limitations from the earlier phases, to pick up once Phase 8 passes and there is a real audience.
-- [ ] Multi-instance support: shared rate limiting (Redis or a gateway) and Postgres checkpointing instead of SQLite.
-- [ ] Authenticate or network-restrict `/metrics`; add CORS configuration for browser clients.
-- [ ] Broaden the safety patterns: slang, misspellings and other languages, driven by new cases in `tests/evals/safety_dataset.jsonl`.
-- [ ] Data retention: automatic expiry of stored conversations, and optional encryption at rest.
-- [ ] Native async nodes (`ainvoke`) so API concurrency does not depend on worker threads.
-- [ ] Optional rolling summary of older turns instead of dropping them.
-- [ ] Cost per conversation (token counts times per-model prices) as a metric.
-- [ ] Prompt-injection red-team cases added to the eval set.
+### Phase 10 — Hardening for real users (partly done)
+Known limitations from the earlier phases. Items marked done were implemented and tested here; the
+rest need infrastructure or a design decision first.
+- [ ] Multi-instance support: shared rate limiting (Redis or a gateway) and Postgres checkpointing instead of SQLite. _(Not started: needs a choice of Redis/Postgres and real services to test against.)_
+- [x] Authenticate or network-restrict `/metrics`; add CORS configuration for browser clients. _(`METRICS_TOKEN` bearer auth and `CORS_ALLOW_ORIGINS`; CORS is off unless configured.)_
+- [x] Broaden the safety patterns: slang, misspellings and other languages, driven by new cases in `tests/evals/safety_dataset.jsonl`. _(English slang and misspellings plus Spanish, with Spanish crisis replies. The dataset exposed two real bugs, fixed. Other languages are still not covered.)_
+- [x] Data retention: automatic expiry of stored conversations, and optional encryption at rest. _(`RETENTION_DAYS`, `--purge-older-than`, `CHECKPOINT_ENCRYPTION_KEY`; the sweep reads every checkpoint, so it is not built for very large databases.)_
+- [ ] Native async nodes (`ainvoke`) so API concurrency does not depend on worker threads. _(Not started: a refactor of every node and the instrumentation wrapper.)_
+- [ ] Optional rolling summary of older turns instead of dropping them. _(Not started: needs a design decision on when to summarize and what to keep.)_
+- [x] Cost per conversation (token counts times per-model prices) as a metric. _(`llm_cost_usd_total` from `MODEL_PRICES`; no per-conversation series, use the average cost per chat. No prices are built in.)_
+- [x] Prompt-injection red-team cases added to the eval set. _(10 cases, live eval; one prompt-extraction case leaked the system prompt, fixed by tightening the prompt, then 10/10 on three runs.)_
 
 ---
 

@@ -8,6 +8,7 @@ from langgraph.graph.message import add_messages
 MessageType = Literal["emotional", "logical", "mixed"]
 SafetyStatus = Literal["ok", "crisis"]
 CrisisCategory = Literal["self_harm", "abuse", "medical_emergency"]
+Language = Literal["en", "es"]
 
 
 class State(TypedDict):
@@ -16,3 +17,4 @@ class State(TypedDict):
     confidence: NotRequired[float | None]
     safety: NotRequired[SafetyStatus]
     crisis_category: NotRequired[CrisisCategory | None]
+    crisis_lang: NotRequired[Language]

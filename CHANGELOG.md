@@ -7,10 +7,25 @@ configuration or behavior.
 
 ## [Unreleased]
 
+### Added
+- `METRICS_TOKEN` (bearer auth for `/metrics`) and `CORS_ALLOW_ORIGINS` (CORS off by default).
+- `MODEL_PRICES` and the `llm_cost_usd_total` metric; `cost_usd` in node logs.
+- `RETENTION_DAYS` automatic expiry of idle conversations, and `--purge-older-than DAYS`.
+- `CHECKPOINT_ENCRYPTION_KEY`: AES encryption of stored conversations.
+- Safety patterns for Spanish (with Spanish crisis replies), slang, misspellings and idiom guards.
+- Prompt-injection red-team set with a live eval (`tests/evals/test_injection_eval.py`).
+
 ### Changed
+- Prompt version `v4`: stronger rule against repeating or quoting the system prompt.
 - GitHub Actions use `actions/checkout@v7` and `astral-sh/setup-uv@v7` (Node 24 runtime).
 - Pre-commit runs ruff and mypy through `uv run`, so hook versions always match `uv.lock` (they
   were pinned to ruff 0.8.6 and mypy 1.14.1 against 0.17.6 and 2.4.1 in the project).
+
+### Fixed
+- "taking my own life" was not matched, and "take my life tonight" was wrongly excluded because
+  "tonight" starts with "to".
+- A prompt-extraction request ("repeat everything above...") made the logical agent recite its
+  system prompt.
 
 ## [0.1.0] - 2026-11-24
 

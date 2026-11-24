@@ -1,5 +1,6 @@
 """FastAPI service: streaming chat over SSE with auth, rate limiting and thread isolation."""
 
+import asyncio
 import json
 import logging
 import re
@@ -9,9 +10,12 @@ import uuid
 from collections import defaultdict, deque
 from collections.abc import AsyncIterator, Callable
 from contextlib import AsyncExitStack, asynccontextmanager
+from datetime import timedelta
 from typing import Any
 
+import aiosqlite
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import InMemorySaver
@@ -24,6 +28,7 @@ from head_and_heart.config import Settings, get_settings
 from head_and_heart.graph import build_default_graph
 from head_and_heart.logging import configure_logging, thread_id_var
 from head_and_heart.observability import CHAT_REQUESTS
+from head_and_heart.storage import make_serde, purge_idle_threads_async
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +89,21 @@ async def _meta(graph: Any, config: RunnableConfig, debug: bool) -> dict[str, An
     return meta
 
 
+async def _retention_loop(saver: Any, max_age: timedelta, interval_s: int) -> None:
+    """Periodically delete conversations that have been idle longer than `max_age`."""
+    while True:
+        try:
+            await purge_idle_threads_async(saver, max_age)
+        except Exception:
+            logger.exception("Retention purge failed")
+        await asyncio.sleep(interval_s)
+
+
+def parse_origins(raw: str) -> list[str]:
+    """Parse comma-separated CORS origins. A bare '*' is allowed but strongly discouraged."""
+    return [o.strip().rstrip("/") for o in raw.split(",") if o.strip()]
+
+
 def _sse(event: str, data: dict[str, Any]) -> str:
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"
 
@@ -101,17 +121,34 @@ def create_app(settings: Settings, graph: Any | None = None) -> FastAPI:
             if graph is not None:
                 app.state.graph = graph
             else:
-                saver = (
-                    await stack.enter_async_context(
-                        AsyncSqliteSaver.from_conn_string(settings.checkpoint_db_path)
+                if settings.persist_history:
+                    conn = await stack.enter_async_context(
+                        aiosqlite.connect(settings.checkpoint_db_path)
                     )
-                    if settings.persist_history
-                    else InMemorySaver()
-                )
+                    saver: Any = AsyncSqliteSaver(conn, serde=make_serde(settings))
+                else:
+                    saver = InMemorySaver()
                 app.state.graph = build_default_graph(settings, saver)
+            if settings.retention_days > 0:
+                task = asyncio.create_task(
+                    _retention_loop(
+                        app.state.graph.checkpointer,
+                        timedelta(days=settings.retention_days),
+                        settings.retention_check_interval_s,
+                    )
+                )
+                stack.callback(task.cancel)
             yield
 
     app = FastAPI(title="Head & Heart chatbot", lifespan=lifespan)
+    if origins := parse_origins(settings.cors_allow_origins):
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_methods=["GET", "POST", "DELETE"],
+            allow_headers=["X-API-Key", "Content-Type"],
+            allow_credentials=False,
+        )
 
     async def authenticate(x_api_key: str | None = Header(default=None)) -> str:
         if settings.api_auth_disabled:
@@ -126,9 +163,19 @@ def create_app(settings: Settings, graph: Any | None = None) -> FastAPI:
     async def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    metrics_token = settings.metrics_token.get_secret_value()
+
     @app.get("/metrics")
-    async def metrics() -> Response:
-        # No message content is recorded. Restrict access at the network level.
+    async def metrics(authorization: str | None = Header(default=None)) -> Response:
+        # No message content is recorded. Without METRICS_TOKEN, restrict it at the network level.
+        if metrics_token:
+            supplied = (authorization or "").removeprefix("Bearer ").strip()
+            if not secrets.compare_digest(supplied, metrics_token):
+                raise HTTPException(
+                    status_code=401,
+                    detail="Invalid or missing metrics token.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
         return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
     @app.post("/chat")
@@ -197,4 +244,4 @@ def app_factory() -> FastAPI:
     return create_app(settings)
 
 
-__all__ = ["RateLimiter", "app_factory", "create_app", "parse_api_keys"]
+__all__ = ["RateLimiter", "app_factory", "create_app", "parse_api_keys", "parse_origins"]
