@@ -142,7 +142,7 @@ Everything before this phase was tested against fake models only. This phase use
 - [x] Verify every hotline number in `crisis.py` for the supported regions. _(US, CA, UK, IN, AU checked against official sites; 999 and 112 were not searched separately.)_
 - [ ] Review Groq's usage, data-retention and acceptable-use policies for mental-health-adjacent use (see `docs/privacy.md`). _(Manual; not done.)_
 - [ ] Add the `GROQ_API_KEY` repo secret so `eval.yml` can run. _(CI itself passes on every push; the secret is yours to add.)_
-- [ ] `docker build .`, run the container and confirm the health check. _(Not done: the Docker daemon was not running.)_
+- [x] `docker build .`, run the container and confirm the health check. _(Done 2026-11-24: 314 MB image, healthy, runs as uid 10001, auth enforced, live chat and crisis path work, JSON logs and metrics populated. Gotcha: `--env-file` keeps quotes, see README.)_
 - [ ] Tag `v0.1.0`: bump the version, move the changelog entries out of `[Unreleased]`.
 
 ### Phase 9 — Demo UI (Streamlit)

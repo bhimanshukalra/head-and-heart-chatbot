@@ -14,7 +14,8 @@ Do these once, then tag `0.1.0` and move the `[Unreleased]` changelog entries un
    independently labeled set is still worth building.
 3. ~~Verify hotline numbers.~~ Done 2026-11-24 against official sources for US, CA, UK, IN and AU.
 4. Read Groq's current terms, data retention and acceptable-use policies for mental-health use.
-5. `docker build .` and run the container with the health check.
+5. ~~`docker build .` and run the container.~~ Done 2026-11-24 (healthy, non-root, live chat and
+   crisis path verified).
 6. Push and confirm both GitHub workflows pass (add a `GROQ_API_KEY` repository secret first).
 
 Release steps: update `version` in `pyproject.toml` and `__version__` in
@@ -60,6 +61,7 @@ so enable it only if your privacy policy allows sending that to LangSmith.
 | Long chats become incoherent | History is trimmed to `MAX_CONTEXT_TOKENS` | Raise it (within the model's window) or add summarization. |
 | `database is locked` or disk errors with persistence | SQLite file on slow or shared storage | Use local disk with a persistent volume. For multiple replicas, move to Postgres (not implemented). |
 | Health check failing in Docker | App crashed at startup | `docker logs <container>` and read the first error. |
+| Groq "Invalid API Key" only inside Docker | `--env-file` kept the quotes around a quoted value | Pass `-e GROQ_API_KEY=...` or remove the quotes from the env file. |
 
 ## Key rotation
 

@@ -6,8 +6,8 @@ ships as a CLI and as a streaming HTTP API, with safety checks for crisis messag
 
 > **Status: pre-release (0.1.0, unreleased).** Checked against the live Groq API on 2026-11-24:
 > model IDs, structured output, the full graph on sample messages, and a 116-message classifier
-> eval. Not yet done: the Docker image has never been built, the weekly eval workflow has no API
-> key secret, and the Groq policy review is outstanding. See
+> eval, plus a Docker build and run. Not yet done: the weekly eval workflow has no API key secret,
+> and the Groq policy review is outstanding. See
 > [Known limitations](#known-limitations) before relying on it.
 
 > **Not a clinical product.** This is an AI assistant, not a licensed therapist or a medical
@@ -116,8 +116,13 @@ docker build -t head-and-heart .
 docker run --rm -p 8000:8000 -e GROQ_API_KEY=... -e API_KEYS=alice:<key> head-and-heart
 ```
 
-The image runs as a non-root user, logs JSON, and has a health check. Mount a volume at `/data`
-and set `PERSIST_HISTORY=true` to keep conversations. The image has not been built or run yet.
+The image (about 314 MB) runs as a non-root user, logs JSON, and has a health check. Mount a volume
+at `/data` and set `PERSIST_HISTORY=true` to keep conversations. It was built and run on
+2026-11-24, with the health check, auth, a live chat and the crisis path all working.
+
+**Quoted values:** `docker run --env-file .env` does not strip quotes, unlike this app's own `.env`
+loading. A line such as `GROQ_API_KEY="gsk_..."` reaches the container with the quote characters
+included and Groq answers "Invalid API Key". Use `-e NAME=value`, or an env file without quotes.
 
 ## Demo UI (Streamlit)
 
@@ -189,7 +194,7 @@ docs/             plan.md, privacy.md, runbook.md
   model agrees with all of them, so it shows the set is easy, not that real traffic will score
   100%. Have someone else label a harder set.
 - Replies were read on only a handful of messages. Review reply quality across more cases.
-- Docker image unbuilt. The weekly eval workflow needs a `GROQ_API_KEY` repo secret.
+- The weekly eval workflow needs a `GROQ_API_KEY` repo secret.
 - Rate limiting is per process. `/metrics` is unauthenticated. No CORS configuration.
 - Agent nodes are synchronous, so the API runs model calls in worker threads.
 - No automatic data retention or expiry.

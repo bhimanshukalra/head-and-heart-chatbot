@@ -43,7 +43,8 @@ runbook's "Before the first release" list pass.**
 - Safety patterns missed "hurting/harming myself" and curly apostrophes.
 
 ### Known issues
-- Docker image has never been built; the weekly eval workflow needs a `GROQ_API_KEY` secret.
+- The weekly eval workflow needs a `GROQ_API_KEY` secret.
+- `docker run --env-file` keeps quotes around values, which breaks a quoted `GROQ_API_KEY` (documented).
 - Groq policy review is outstanding.
 - The live safety confirmation errs toward crisis replies on some informational messages.
 - The classifier eval scores 100%, which mainly shows the labeled set is easy.
