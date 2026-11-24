@@ -41,17 +41,24 @@ def test_classifier_accuracy(capsys: pytest.CaptureFixture[str]) -> None:
 
     confusion: Counter[tuple[str, str]] = Counter()
     errors: list[str] = []
+    failures = 0
     for row in CLASSIFIER:
         messages: list[Any] = [
             HumanMessage(m["content"]) if m["role"] == "user" else AIMessage(m["content"])
             for m in row.get("context", [])
         ]
         messages.append(HumanMessage(row["text"]))
-        predicted = classify({"messages": messages})["message_type"]
+        result = classify({"messages": messages})
+        if result["confidence"] is None:  # the node swallowed an API or parsing error
+            failures += 1
+        predicted = result["message_type"]
         confusion[(row["label"], predicted)] += 1
         if predicted != row["label"]:
             errors.append(f"[{row['label']} -> {predicted}] {row['text'][:80]}")
 
+    assert failures == 0, (
+        f"classifier call failed on {failures} rows; check GROQ_API_KEY, model IDs and logs"
+    )
     total = len(CLASSIFIER)
     accuracy = sum(confusion[(label, label)] for label in LABELS) / total
     lines = [f"accuracy={accuracy:.3f} (n={total})"]

@@ -128,9 +128,9 @@ head-and-heart-chatbot/
 - [x] Coverage gate (e.g. ≥85% on non-LLM code). _(98% measured; `fail_under = 85` in `pyproject.toml`.)_
 
 ### Phase 7 — Docs & release
-- [ ] README: setup, env vars, run, test, architecture diagram, safety notes.
-- [ ] `CHANGELOG.md`, semantic versioning, tagged releases.
-- [ ] Runbook: common failures (rate limits, key rotation), how to read traces.
+- [x] README: setup, env vars, run, test, architecture diagram, safety notes.
+- [x] `CHANGELOG.md`, semantic versioning, tagged releases. _(changelog written under `[Unreleased]`; **no tag created**, tag `v0.1.0` after the pre-release checks in `docs/runbook.md`.)_
+- [x] Runbook: common failures (rate limits, key rotation), how to read traces. _(`docs/runbook.md`; written from the code, not from live operations.)_
 
 ---
 
@@ -138,20 +138,22 @@ head-and-heart-chatbot/
 
 | Decision | Recommendation | Alternatives |
 |----------|----------------|--------------|
-| Model | Configurable; default to a current Claude Sonnet, classifier on a cheaper/faster model (Haiku) | Single model for all nodes |
-| Persistence | SQLite for CLI/dev, Postgres for service | In-memory only |
-| Delivery surface | CLI first, then FastAPI | Web UI / Slack bot |
-| Safety check | Keyword prefilter + LLM confirm | LLM-only (slower/costlier), keywords-only (misses nuance) |
-| Mixed messages | Dedicated `blended` agent | Run both agents and merge |
+| Model | **Decided: Groq.** Llama 3.3 70B for agents, Llama 3.1 8B for classifier and safety (IDs unverified) | Single model for all nodes |
+| Persistence | **Implemented:** opt-in SQLite, in-memory by default. Postgres not built | In-memory only |
+| Delivery surface | **Implemented:** CLI and FastAPI (SSE) | Web UI / Slack bot |
+| Safety check | **Implemented:** regex prefilter + LLM confirm, fail-safe to crisis | LLM-only (slower/costlier), keywords-only (misses nuance) |
+| Mixed messages | **Implemented:** dedicated `blended` agent | Run both agents and merge |
 
 ## 5. Definition of done
 
-- Multi-turn conversations retain context across restarts.
-- No unhandled exceptions from API failures; all failures degrade gracefully and are logged.
-- Crisis inputs always produce the vetted crisis response.
-- ≥85% test coverage on deterministic code; classifier eval accuracy tracked and ≥90% on the labeled set.
-- CI green (lint, types, tests); Docker image builds and passes health check.
-- No secrets or raw user content in logs.
+- [x] Multi-turn conversations retain context across restarts (tested with SQLite; needs `PERSIST_HISTORY`).
+- [x] API failures degrade gracefully and are logged (tested with fake failing models only).
+- [x] Explicit crisis inputs always get the vetted reply. Ambiguous ones depend on an LLM check that fails safe.
+- [x] ≥85% test coverage on deterministic code (98% measured).
+- [ ] Classifier eval accuracy ≥90% on the labeled set (eval written, never run against Groq).
+- [ ] CI green on GitHub (workflows never run).
+- [ ] Docker image builds and passes its health check (never built).
+- [x] No secrets or raw user content in logs (by design, with redaction tests; not audited against a live run).
 
 ## 6. Suggested order of work
 
