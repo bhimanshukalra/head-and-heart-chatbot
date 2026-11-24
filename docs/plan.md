@@ -141,7 +141,7 @@ Everything before this phase was tested against fake models only. This phase use
 - [x] Run `pytest -m eval tests/evals/test_classifier_eval.py -s`; review the confusion matrix and misclassified rows. _(116/116, including 16 harder cases. The labels are mine and the model agrees with all of them, so the set is easy; an independently labeled, harder set is still worth building.)_
 - [x] Verify every hotline number in `crisis.py` for the supported regions. _(US, CA, UK, IN, AU checked against official sites; 999 and 112 were not searched separately.)_
 - [ ] Review Groq's usage, data-retention and acceptable-use policies for mental-health-adjacent use (see `docs/privacy.md`). _(Manual; not done.)_
-- [ ] Add the `GROQ_API_KEY` repo secret so `eval.yml` can run. _(CI itself passes on every push; the secret is yours to add.)_
+- [x] Add the `GROQ_API_KEY` repo secret so `eval.yml` can run. _(Added by the owner; a manual run of `eval.yml` passed on 2026-11-24: 116/116 in 3m47s.)_
 - [x] `docker build .`, run the container and confirm the health check. _(Done 2026-11-24: 314 MB image, healthy, runs as uid 10001, auth enforced, live chat and crisis path work, JSON logs and metrics populated. Gotcha: `--env-file` keeps quotes, see README.)_
 - [x] Tag `v0.1.0`: bump the version, move the changelog entries out of `[Unreleased]`. _(Tagged with the Groq policy review and the repo secret still open; both stay unchecked above.)_
 

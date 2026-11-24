@@ -6,8 +6,8 @@ ships as a CLI and as a streaming HTTP API, with safety checks for crisis messag
 
 > **Status: early release (v0.1.0).** Checked against the live Groq API on 2026-11-24:
 > model IDs, structured output, the full graph on sample messages, and a 116-message classifier
-> eval, plus a Docker build and run. Not yet done: the weekly eval workflow has no API key secret,
-> and the Groq policy review is outstanding. See
+> eval (also run in GitHub Actions), plus a Docker build and run. Not yet done: the Groq policy
+> review. See
 > [Known limitations](#known-limitations) before relying on it.
 
 > **Not a clinical product.** This is an AI assistant, not a licensed therapist or a medical
@@ -194,7 +194,8 @@ docs/             plan.md, privacy.md, runbook.md
   model agrees with all of them, so it shows the set is easy, not that real traffic will score
   100%. Have someone else label a harder set.
 - Replies were read on only a handful of messages. Review reply quality across more cases.
-- The weekly eval workflow needs a `GROQ_API_KEY` repo secret.
+- GitHub warns that `actions/checkout@v4` and `astral-sh/setup-uv@v6` run on a deprecated
+  Node.js 20 runtime (currently forced to Node 24). Bump them when newer majors are available.
 - Rate limiting is per process. `/metrics` is unauthenticated. No CORS configuration.
 - Agent nodes are synchronous, so the API runs model calls in worker threads.
 - No automatic data retention or expiry.

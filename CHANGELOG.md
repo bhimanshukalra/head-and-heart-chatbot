@@ -11,7 +11,7 @@ configuration or behavior.
 
 First tagged release. It was checked against the live Groq API, but two pre-release items were
 still open when it was tagged: the Groq policy review and the `GROQ_API_KEY` repository secret
-for the weekly eval workflow (see Known issues). Treat it as an early release, not as ready for
+for the weekly eval workflow (the secret was added afterwards and the workflow passed). Treat it as an early release, not as ready for
 unsupervised public use.
 
 ### Added
@@ -47,7 +47,7 @@ unsupervised public use.
 - Safety patterns missed "hurting/harming myself" and curly apostrophes.
 
 ### Known issues
-- The weekly eval workflow needs a `GROQ_API_KEY` secret.
+- GitHub Actions warns that `checkout@v4` and `setup-uv@v6` use a deprecated Node.js runtime.
 - `docker run --env-file` keeps quotes around values, which breaks a quoted `GROQ_API_KEY` (documented).
 - Groq policy review is outstanding.
 - The live safety confirmation errs toward crisis replies on some informational messages.
