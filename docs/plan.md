@@ -113,11 +113,11 @@ head-and-heart-chatbot/
 - [ ] Review Groq usage policies for mental-health-adjacent products. _(manual task, not done; checklist in `docs/privacy.md`.)_
 
 ### Phase 5 — Observability & serving
-- [ ] Structured JSON logging with `thread_id`, node name, latency, token usage (no raw message content at INFO).
-- [ ] Tracing with LangSmith (env-flag controlled) or OpenTelemetry.
-- [ ] Metrics: classification distribution, crisis triggers, error rate, p50/p95 latency, cost per conversation.
-- [ ] FastAPI service: `POST /chat` (SSE streaming), `GET /health`, per-user `thread_id`, request validation, rate limiting, auth.
-- [ ] Dockerfile (multi-stage, `uv`), non-root user, health check.
+- [x] Structured JSON logging with `thread_id`, node name, latency, token usage (no raw message content at INFO). _(`LOG_FORMAT=json`; per-node latency and tokens logged, never message text.)_
+- [x] Tracing with LangSmith (env-flag controlled) or OpenTelemetry. _(LangSmith via env vars only, off by default; it sends message content to LangSmith.)_
+- [x] Metrics: classification distribution, crisis triggers, error rate, p50/p95 latency, cost per conversation. _(Prometheus `/metrics`; latency histograms give p50/p95, tokens are counted but cost per conversation is not computed.)_
+- [x] FastAPI service: `POST /chat` (SSE streaming), `GET /health`, per-user `thread_id`, request validation, rate limiting, auth. _(auth via `API_KEYS`, in-process rate limit, `DELETE /threads/{id}`; single-process limiter, no CORS.)_
+- [x] Dockerfile (multi-stage, `uv`), non-root user, health check. _(written but not built: Docker daemon was not running.)_
 
 ### Phase 6 — Testing & CI
 - [ ] **Unit tests:** each node with a fake chat model (`GenericFakeChatModel`) — no network.

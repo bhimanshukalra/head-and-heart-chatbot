@@ -5,17 +5,21 @@ description = "LangGraph chatbot that routes messages to an emotional or logical
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.165.0",
     "langchain>=1.5.2",
     "langchain-groq>=1.2.1",
     "langgraph>=1.2.24",
     "langgraph-checkpoint-sqlite>=3.1.3",
+    "prometheus-client>=0.26.0",
     "pydantic-settings>=2.16.3",
     "python-dotenv>=1.2.4",
     "tenacity>=9.2.1",
+    "uvicorn>=0.54.0",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "mypy>=2.4.1",
     "pre-commit>=4.7.0",
     "pytest>=9.2.0",

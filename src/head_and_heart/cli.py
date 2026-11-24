@@ -12,9 +12,8 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 
 from head_and_heart.chat import InputTooLongError, stream_reply, validate_input
 from head_and_heart.config import Settings, get_settings
-from head_and_heart.graph import build_graph
-from head_and_heart.llm import get_chat_model
-from head_and_heart.logging import configure_logging
+from head_and_heart.graph import build_default_graph
+from head_and_heart.logging import configure_logging, thread_id_var
 
 EXIT_COMMANDS = {"exit", "quit"}
 DISCLAIMER = (
@@ -40,7 +39,7 @@ def delete_thread(settings: Settings, thread_id: str) -> None:
 def main() -> None:
     args = _parse_args()
     settings = get_settings()
-    configure_logging(settings.log_level)
+    configure_logging(settings.log_level, settings.log_format)
 
     if args.delete_thread:
         delete_thread(settings, args.delete_thread)
@@ -53,20 +52,10 @@ def main() -> None:
         if settings.persist_history
         else None
     )
-    graph = build_graph(
-        classifier_llm=get_chat_model(
-            settings, model_name=settings.classifier_model_name, temperature=0
-        ),
-        therapist_llm=get_chat_model(settings, model_name=settings.model_name, temperature=0.7),
-        logical_llm=get_chat_model(settings, model_name=settings.model_name, temperature=0.2),
-        blended_llm=get_chat_model(settings, model_name=settings.model_name, temperature=0.5),
-        checkpointer=SqliteSaver(conn) if conn else InMemorySaver(),
-        max_context_tokens=settings.max_context_tokens,
-        confidence_threshold=settings.classifier_confidence_threshold,
-        crisis_region=settings.crisis_region,
-    )
+    graph = build_default_graph(settings, SqliteSaver(conn) if conn else InMemorySaver())
     thread_id = args.thread_id or str(uuid.uuid4())
     config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
+    thread_id_var.set(thread_id)
     if settings.persist_history:
         print(f"Thread: {thread_id} (resume with --thread-id; delete with --delete-thread)")
     else:

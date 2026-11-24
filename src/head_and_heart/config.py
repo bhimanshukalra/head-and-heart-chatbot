@@ -3,6 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
+from dotenv import load_dotenv
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -37,6 +38,15 @@ class Settings(BaseSettings):
     persist_history: bool = Field(
         default=False, description="Opt in to storing conversations in SQLite."
     )
+    log_format: Literal["text", "json"] = "text"
+    api_keys: SecretStr = Field(
+        default=SecretStr(""),
+        description="Comma-separated 'user:key' pairs accepted by the HTTP API.",
+    )
+    api_auth_disabled: bool = Field(
+        default=False, description="Only for local development: disables API key auth."
+    )
+    rate_limit_per_minute: int = Field(default=20, gt=0)
     checkpoint_db_path: str = Field(default="chat_history.sqlite", description="SQLite file.")
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
@@ -44,4 +54,5 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """Return cached settings; fails fast if configuration is invalid."""
+    load_dotenv()  # so libraries that read os.environ (e.g. LangSmith) see .env values
     return Settings()

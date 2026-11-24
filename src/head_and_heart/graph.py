@@ -1,5 +1,6 @@
 """Graph assembly."""
 
+from collections.abc import Callable
 from typing import Any, Literal
 
 from langchain_core.language_models import BaseChatModel
@@ -7,6 +8,8 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
+from head_and_heart.config import Settings
+from head_and_heart.llm import get_chat_model
 from head_and_heart.nodes.agents import (
     DEFAULT_MAX_CONTEXT_TOKENS,
     make_blended,
@@ -19,6 +22,7 @@ from head_and_heart.nodes.classifier import (
     make_classifier,
 )
 from head_and_heart.nodes.safety import make_crisis_response, make_safety_check
+from head_and_heart.observability import instrument
 from head_and_heart.state import State
 
 
@@ -50,15 +54,16 @@ def build_graph(
     confidence_threshold: float = DEFAULT_CONFIDENCE_THRESHOLD,
 ) -> CompiledStateGraph[State, None, State, State]:
     builder = StateGraph(State)
-    builder.add_node("safety_check", make_safety_check(safety_llm or classifier_llm))  # type: ignore[call-overload]
-    builder.add_node("crisis_response", make_crisis_response(crisis_region))  # type: ignore[call-overload]
-    builder.add_node("classifier", make_classifier(classifier_llm, confidence_threshold))  # type: ignore[call-overload]
-    builder.add_node("therapist", make_therapist(therapist_llm, max_context_tokens))  # type: ignore[call-overload]
-    builder.add_node(
-        "blended",
-        make_blended(blended_llm or therapist_llm, max_context_tokens),  # type: ignore[call-overload]
-    )
-    builder.add_node("logical", make_logical(logical_llm, max_context_tokens))  # type: ignore[call-overload]
+    nodes: dict[str, Callable[[State], dict[str, Any]]] = {
+        "safety_check": make_safety_check(safety_llm or classifier_llm),
+        "crisis_response": make_crisis_response(crisis_region),
+        "classifier": make_classifier(classifier_llm, confidence_threshold),
+        "therapist": make_therapist(therapist_llm, max_context_tokens),
+        "blended": make_blended(blended_llm or therapist_llm, max_context_tokens),
+        "logical": make_logical(logical_llm, max_context_tokens),
+    }
+    for name, node in nodes.items():
+        builder.add_node(name, instrument(name, node))  # type: ignore[call-overload]
 
     builder.add_edge(START, "safety_check")
     builder.add_conditional_edges(
@@ -74,3 +79,21 @@ def build_graph(
     builder.add_edge("logical", END)
     builder.add_edge("blended", END)
     return builder.compile(checkpointer=checkpointer)
+
+
+def build_default_graph(
+    settings: Settings, checkpointer: BaseCheckpointSaver[Any]
+) -> CompiledStateGraph[State, None, State, State]:
+    """Build the production graph with Groq models taken from settings."""
+    return build_graph(
+        classifier_llm=get_chat_model(
+            settings, model_name=settings.classifier_model_name, temperature=0
+        ),
+        therapist_llm=get_chat_model(settings, model_name=settings.model_name, temperature=0.7),
+        logical_llm=get_chat_model(settings, model_name=settings.model_name, temperature=0.2),
+        blended_llm=get_chat_model(settings, model_name=settings.model_name, temperature=0.5),
+        checkpointer=checkpointer,
+        max_context_tokens=settings.max_context_tokens,
+        confidence_threshold=settings.classifier_confidence_threshold,
+        crisis_region=settings.crisis_region,
+    )
