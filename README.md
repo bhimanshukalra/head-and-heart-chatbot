@@ -194,8 +194,6 @@ docs/             plan.md, privacy.md, runbook.md
   model agrees with all of them, so it shows the set is easy, not that real traffic will score
   100%. Have someone else label a harder set.
 - Replies were read on only a handful of messages. Review reply quality across more cases.
-- GitHub warns that `actions/checkout@v4` and `astral-sh/setup-uv@v6` run on a deprecated
-  Node.js 20 runtime (currently forced to Node 24). Bump them when newer majors are available.
 - Rate limiting is per process. `/metrics` is unauthenticated. No CORS configuration.
 - Agent nodes are synchronous, so the API runs model calls in worker threads.
 - No automatic data retention or expiry.

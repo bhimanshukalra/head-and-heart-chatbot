@@ -7,6 +7,11 @@ configuration or behavior.
 
 ## [Unreleased]
 
+### Changed
+- GitHub Actions use `actions/checkout@v7` and `astral-sh/setup-uv@v7` (Node 24 runtime).
+- Pre-commit runs ruff and mypy through `uv run`, so hook versions always match `uv.lock` (they
+  were pinned to ruff 0.8.6 and mypy 1.14.1 against 0.17.6 and 2.4.1 in the project).
+
 ## [0.1.0] - 2026-11-24
 
 First tagged release. It was checked against the live Groq API, but two pre-release items were
@@ -47,7 +52,6 @@ unsupervised public use.
 - Safety patterns missed "hurting/harming myself" and curly apostrophes.
 
 ### Known issues
-- GitHub Actions warns that `checkout@v4` and `setup-uv@v6` use a deprecated Node.js runtime.
 - `docker run --env-file` keeps quotes around values, which breaks a quoted `GROQ_API_KEY` (documented).
 - Groq policy review is outstanding.
 - The live safety confirmation errs toward crisis replies on some informational messages.

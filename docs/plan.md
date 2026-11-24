@@ -80,7 +80,7 @@ head-and-heart-chatbot/
 - [x] Restructure into `src/head_and_heart/` package; keep `main.py` as thin entrypoint (or `[project.scripts]` console command).
 - [x] `.env.example` (`GROQ_API_KEY`, `LLM_PROVIDER`, `MODEL_NAME`, `LOG_LEVEL`); ensure `.env` in `.gitignore`.
 - [x] `config.py` with `pydantic-settings`; fail fast if API key missing.
-- [x] Ruff + mypy config in `pyproject.toml`; pre-commit hooks. _(pre-commit config written; hooks not installed, versions may need `pre-commit autoupdate`.)_
+- [x] Ruff + mypy config in `pyproject.toml`; pre-commit hooks. _(pre-commit hooks now call `uv run ruff` / `uv run mypy`, so versions follow `uv.lock`; run `uv run pre-commit install` to enable them.)_
 
 ### Phase 1 — Fix correctness (highest value, smallest diff)
 - [x] Pass **full (trimmed) history** to agents: `[system] + state["messages"]`.
