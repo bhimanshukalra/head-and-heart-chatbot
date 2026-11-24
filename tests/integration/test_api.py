@@ -129,3 +129,48 @@ def test_rate_limiter_window() -> None:
     assert not limiter.allow("u")
     now[0] = 11
     assert limiter.allow("u")
+
+
+def test_stream_failure_emits_error_event_without_leaking_details() -> None:
+    class Broken:
+        async def astream(self, *a: Any, **k: Any) -> Any:
+            raise RuntimeError("secret internal detail")
+            yield  # pragma: no cover
+
+    with TestClient(create_app(_settings(), graph=Broken())) as c:
+        r = c.post("/chat", json={"message": "hi"}, headers=HEADERS_A)
+    events = _events(r.text)
+    assert events[-1][0] == "error"
+    assert "secret" not in r.text
+
+
+def test_delete_rejects_bad_thread_id(make_client: Any) -> None:
+    with make_client() as c:
+        assert c.delete("/threads/bad%3Aid", headers=HEADERS_A).status_code == 422
+
+
+@pytest.mark.parametrize("persist", [False, True])
+def test_default_lifespan_builds_graph(
+    persist: bool,
+    tmp_path: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    make_classifier_llm: Any,
+    make_agent_llm: Any,
+) -> None:
+    from head_and_heart import api
+
+    monkeypatch.setattr(
+        api,
+        "build_default_graph",
+        lambda settings, saver: build_graph(
+            classifier_llm=make_classifier_llm("logical"),
+            therapist_llm=make_agent_llm("THERAPIST"),
+            logical_llm=make_agent_llm("LOGICAL"),
+            checkpointer=saver,
+        ),
+    )
+    settings = _settings(persist_history=persist, checkpoint_db_path=str(tmp_path / "t.sqlite"))
+    with TestClient(create_app(settings)) as c:
+        r = c.post("/chat", json={"message": "hi", "thread_id": "p"}, headers=HEADERS_A)
+        assert "LOGICAL" in r.text
+        assert c.delete("/threads/p", headers=HEADERS_A).status_code == 204

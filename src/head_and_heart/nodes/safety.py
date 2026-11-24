@@ -28,7 +28,7 @@ STRONG: dict[CrisisCategory, list[re.Pattern[str]]] = {
             r"\bwant(ed)?\s+to\s+die\b",
             r"\b(don'?t|do not)\s+want\s+to\s+(live|be alive|be here)\b",
             r"\bbetter off dead\b",
-            r"\b(hurt|cut|harm)(ting)?\s+myself\b",
+            r"\b(hurt|cut|harm)(t?ing)?\s+myself\b",
             r"\bend it all\b",
         ]
     ),
@@ -90,7 +90,8 @@ def make_safety_check(llm: BaseChatModel) -> Callable[[State], dict[str, Any]]:
     structured = llm.with_structured_output(SafetyAssessment)
 
     def safety_check(state: State) -> dict[str, Any]:
-        text = state["messages"][-1].text
+        # Phones often type curly apostrophes, which would defeat the patterns.
+        text = state["messages"][-1].text.replace("\u2019", "'")
 
         if category := _first_match(text, STRONG):
             logger.warning("Safety: explicit crisis pattern (%s)", category)

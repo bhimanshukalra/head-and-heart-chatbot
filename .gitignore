@@ -19,3 +19,5 @@ wheels/
 
 # Local chat history
 *.sqlite
+.coverage
+htmlcov/

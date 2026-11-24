@@ -24,6 +24,7 @@ dev = [
     "pre-commit>=4.7.0",
     "pytest>=9.2.0",
     "pytest-asyncio>=1.5.0",
+    "pytest-cov>=7.1.0",
     "ruff>=0.17.6",
 ]
 
@@ -52,5 +53,14 @@ files = ["src", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-m 'not eval'"
+markers = ["eval: live-model evaluations (need GROQ_API_KEY); run with `pytest -m eval`"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+
+[tool.coverage.run]
+source = ["head_and_heart"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true

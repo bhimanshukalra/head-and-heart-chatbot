@@ -1,0 +1,100 @@
+{"text": "What is the capital of Australia?", "label": "logical"}
+{"text": "How do I convert a string to an integer in Python?", "label": "logical"}
+{"text": "Explain the difference between TCP and UDP.", "label": "logical"}
+{"text": "What's the boiling point of water at sea level in Fahrenheit?", "label": "logical"}
+{"text": "How many days are there in a leap year?", "label": "logical"}
+{"text": "Can you summarize the causes of World War I?", "label": "logical"}
+{"text": "What is the time complexity of binary search?", "label": "logical"}
+{"text": "How do I set up a budget spreadsheet in Excel?", "label": "logical"}
+{"text": "Which is bigger, 3/8 or 5/16?", "label": "logical"}
+{"text": "What documents do I need to renew a passport?", "label": "logical"}
+{"text": "How does compound interest work?", "label": "logical"}
+{"text": "Give me a recipe for pancakes.", "label": "logical"}
+{"text": "What is the difference between a virus and a bacterium?", "label": "logical"}
+{"text": "How do I reverse a linked list?", "label": "logical"}
+{"text": "Convert 72 kilometers per hour to meters per second.", "label": "logical"}
+{"text": "What are the symptoms of vitamin D deficiency?", "label": "logical"}
+{"text": "How do I write a formal email to request a refund?", "label": "logical"}
+{"text": "What does the HTTP status code 404 mean?", "label": "logical"}
+{"text": "List three pros and cons of remote work.", "label": "logical"}
+{"text": "How long should I boil an egg for a soft yolk?", "label": "logical"}
+{"text": "Who wrote Pride and Prejudice?", "label": "logical"}
+{"text": "What's the best way to learn SQL quickly?", "label": "logical"}
+{"text": "How do I merge two dictionaries in Python?", "label": "logical"}
+{"text": "Explain photosynthesis in simple terms.", "label": "logical"}
+{"text": "What is the square root of 144?", "label": "logical"}
+{"text": "How do I change a flat tire?", "label": "logical"}
+{"text": "Compare renting versus buying a home in terms of cost.", "label": "logical"}
+{"text": "What is the GDP of Japan roughly?", "label": "logical"}
+{"text": "How can I improve my resume formatting?", "label": "logical"}
+{"text": "What's the difference between affect and effect?", "label": "logical"}
+{"text": "How do I create a git branch and push it?", "label": "logical"}
+{"text": "Translate 'good morning' into Spanish.", "label": "logical"}
+{"text": "What are the main differences between iOS and Android?", "label": "logical"}
+{"text": "How do vaccines train the immune system?", "label": "logical"}
+{"text": "Outline a study schedule for learning French in six months.", "label": "logical"}
+{"text": "I feel like nobody understands me lately.", "label": "emotional"}
+{"text": "I've been feeling really lonely since I moved here.", "label": "emotional"}
+{"text": "I'm so sad today and I don't even know why.", "label": "emotional"}
+{"text": "My best friend stopped talking to me and it hurts.", "label": "emotional"}
+{"text": "I feel like a failure.", "label": "emotional"}
+{"text": "I can't stop crying and I don't know what to do with these feelings.", "label": "emotional"}
+{"text": "I'm overwhelmed and exhausted by everything.", "label": "emotional"}
+{"text": "I miss my mom so much since she passed.", "label": "emotional"}
+{"text": "I feel anxious all the time and it's wearing me down.", "label": "emotional"}
+{"text": "Everyone seems to be doing better than me and I feel left behind.", "label": "emotional"}
+{"text": "I'm so angry at my brother and I hate feeling this way.", "label": "emotional"}
+{"text": "I feel empty lately, like nothing excites me.", "label": "emotional"}
+{"text": "I'm ashamed of how I acted last night.", "label": "emotional"}
+{"text": "I just need someone to listen to me right now.", "label": "emotional"}
+{"text": "I feel so guilty about leaving my hometown.", "label": "emotional"}
+{"text": "Lately I feel invisible at work.", "label": "emotional"}
+{"text": "I'm scared that I'll never be good enough.", "label": "emotional"}
+{"text": "I had a really rough day and just want to vent.", "label": "emotional"}
+{"text": "I feel heartbroken after the breakup.", "label": "emotional"}
+{"text": "I'm jealous of my sister's success and it makes me feel awful.", "label": "emotional"}
+{"text": "I feel disconnected from my family.", "label": "emotional"}
+{"text": "I'm grieving my dog and it feels unbearable.", "label": "emotional"}
+{"text": "I'm embarrassed that I cried in front of my team.", "label": "emotional"}
+{"text": "I feel trapped in my life and I'm not sure why.", "label": "emotional"}
+{"text": "It hurts that my parents don't believe in me.", "label": "emotional"}
+{"text": "I'm terrified of disappointing everyone.", "label": "emotional"}
+{"text": "I feel numb and I don't know how to describe it.", "label": "emotional"}
+{"text": "I'm so proud of myself today but nobody to share it with, and that makes me sad.", "label": "emotional"}
+{"text": "I feel restless and unhappy and can't explain it.", "label": "emotional"}
+{"text": "I'm struggling with self-doubt every single day.", "label": "emotional"}
+{"text": "I'm so stressed about my exam tomorrow, how should I study tonight?", "label": "mixed"}
+{"text": "I feel awful after being laid off. How do I write a good resume?", "label": "mixed"}
+{"text": "My anxiety is through the roof about my presentation. Any tips to structure it?", "label": "mixed"}
+{"text": "I'm devastated about my breakup and need to figure out how to split the lease.", "label": "mixed"}
+{"text": "I feel overwhelmed by my workload. How can I prioritize my tasks?", "label": "mixed"}
+{"text": "I'm so lonely in this new city. Where can I meet people?", "label": "mixed"}
+{"text": "I'm furious with my landlord, and I need to know my rights as a tenant.", "label": "mixed"}
+{"text": "I feel burned out. What are some practical ways to take a break from work?", "label": "mixed"}
+{"text": "My dad was just diagnosed and I'm scared. What questions should I ask the doctor?", "label": "mixed"}
+{"text": "I'm panicking about money. Can you help me build a budget?", "label": "mixed"}
+{"text": "I feel terrible about failing my driving test. What should I do differently next time?", "label": "mixed"}
+{"text": "I'm sad that my friend moved away. How do I keep a long-distance friendship alive?", "label": "mixed"}
+{"text": "I'm nervous about my job interview and want to prepare answers to common questions.", "label": "mixed"}
+{"text": "I feel so stuck in my career. What steps can I take to change fields?", "label": "mixed"}
+{"text": "I'm anxious about moving abroad. What should I put on my checklist?", "label": "mixed"}
+{"text": "I feel ashamed of my debt. How do I start paying it off?", "label": "mixed"}
+{"text": "I can't sleep because of stress. What are good evening routines?", "label": "mixed"}
+{"text": "I'm heartbroken and also need to decide whether to keep our shared car.", "label": "mixed"}
+{"text": "I feel overwhelmed as a new parent. How do I set up a feeding schedule?", "label": "mixed"}
+{"text": "I'm worried my coworkers dislike me. How do I give feedback to my manager about it?", "label": "mixed"}
+{"text": "I feel so unmotivated, and I also have to finish a thesis by June. How do I plan it?", "label": "mixed"}
+{"text": "I'm upset because my team ignored my idea. How do I raise it in the next meeting?", "label": "mixed"}
+{"text": "I'm scared about my surgery next week. What should I pack for the hospital?", "label": "mixed"}
+{"text": "I'm grieving my grandfather and need to know how to handle his estate paperwork.", "label": "mixed"}
+{"text": "I feel hopeless about learning math, can you explain fractions in a way I can finally get?", "label": "mixed"}
+{"text": "yes, exactly", "label": "emotional", "context": [{"role": "user", "content": "I've been feeling really lonely since the move."}, {"role": "assistant", "content": "That sounds really hard. Do you feel like you have anyone to talk to?"}]}
+{"text": "yeah that's how it feels", "label": "emotional", "context": [{"role": "user", "content": "I feel like I'm failing at everything."}, {"role": "assistant", "content": "It sounds like you're carrying a lot. What's been weighing on you most?"}]}
+{"text": "okay and what about the second one?", "label": "logical", "context": [{"role": "user", "content": "What are two common sorting algorithms?"}, {"role": "assistant", "content": "Quicksort and mergesort are two common ones."}]}
+{"text": "can you give an example?", "label": "logical", "context": [{"role": "user", "content": "What is a Python decorator?"}, {"role": "assistant", "content": "A decorator is a function that wraps another function to extend its behavior."}]}
+{"text": "thanks, and how long does that take?", "label": "logical", "context": [{"role": "user", "content": "How do I renew my passport?"}, {"role": "assistant", "content": "You submit the form, photos and fee online or by mail."}]}
+{"text": "it just never stops", "label": "emotional", "context": [{"role": "user", "content": "My anxiety has been awful this week."}, {"role": "assistant", "content": "I'm sorry, that sounds exhausting. What does it feel like for you?"}]}
+{"text": "so what should I actually do about it?", "label": "mixed", "context": [{"role": "user", "content": "I'm so upset my boss criticized my report in front of everyone."}, {"role": "assistant", "content": "That sounds really embarrassing and painful."}]}
+{"text": "makes sense, and how do I fix the formula?", "label": "logical", "context": [{"role": "user", "content": "My spreadsheet total is wrong."}, {"role": "assistant", "content": "Check whether the range includes all rows."}]}
+{"text": "I guess I just miss her", "label": "emotional", "context": [{"role": "user", "content": "It's been a year since my grandmother died."}, {"role": "assistant", "content": "A year can feel both long and short. How are you doing today?"}]}
+{"text": "any tips on how to cope and also get my work done?", "label": "mixed", "context": [{"role": "user", "content": "I'm having a really hard time since the breakup."}, {"role": "assistant", "content": "I'm sorry you're going through that."}]}

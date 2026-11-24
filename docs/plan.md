@@ -120,12 +120,12 @@ head-and-heart-chatbot/
 - [x] Dockerfile (multi-stage, `uv`), non-root user, health check. _(written but not built: Docker daemon was not running.)_
 
 ### Phase 6 — Testing & CI
-- [ ] **Unit tests:** each node with a fake chat model (`GenericFakeChatModel`) — no network.
-- [ ] **Graph tests:** routing for emotional / logical / mixed / crisis / classifier-failure paths.
-- [ ] **Memory test:** follow-up message referencing earlier turn resolves correctly.
-- [ ] **Eval set:** ~100 labeled messages; track classifier accuracy/F1 in a separate, opt-in (`-m eval`) run.
-- [ ] GitHub Actions: `ruff`, `mypy`, `pytest` on PR; eval job on schedule/manual.
-- [ ] Coverage gate (e.g. ≥85% on non-LLM code).
+- [x] **Unit tests:** each node with a fake chat model (`GenericFakeChatModel`) — no network.
+- [x] **Graph tests:** routing for emotional / logical / mixed / crisis / classifier-failure paths.
+- [x] **Memory test:** follow-up message referencing earlier turn resolves correctly.
+- [x] **Eval set:** ~100 labeled messages; track classifier accuracy/F1 in a separate, opt-in (`-m eval`) run. _(100 classifier rows plus a 49-row safety set in `tests/evals/`; the classifier eval is written but has never been run against real Groq. Labels are my own judgment.)_
+- [x] GitHub Actions: `ruff`, `mypy`, `pytest` on PR; eval job on schedule/manual. _(`.github/workflows/ci.yml`, `eval.yml`; needs a `GROQ_API_KEY` repo secret; workflows have not run on GitHub yet.)_
+- [x] Coverage gate (e.g. ≥85% on non-LLM code). _(98% measured; `fail_under = 85` in `pyproject.toml`.)_
 
 ### Phase 7 — Docs & release
 - [ ] README: setup, env vars, run, test, architecture diagram, safety notes.
