@@ -4,7 +4,7 @@ A LangGraph chatbot that decides whether a message needs a **heart** response (e
 or a **head** response (facts and practical help), or both, and routes it to the right agent. It
 ships as a CLI and as a streaming HTTP API, with safety checks for crisis messages.
 
-> **Status: pre-release (0.1.0, unreleased).** Checked against the live Groq API on 2026-11-24:
+> **Status: early release (v0.1.0).** Checked against the live Groq API on 2026-11-24:
 > model IDs, structured output, the full graph on sample messages, and a 116-message classifier
 > eval, plus a Docker build and run. Not yet done: the weekly eval workflow has no API key secret,
 > and the Groq policy review is outstanding. See

@@ -129,7 +129,7 @@ head-and-heart-chatbot/
 
 ### Phase 7 — Docs & release
 - [x] README: setup, env vars, run, test, architecture diagram, safety notes.
-- [x] `CHANGELOG.md`, semantic versioning, tagged releases. _(changelog written under `[Unreleased]`; **no tag created**, tag `v0.1.0` after the pre-release checks in `docs/runbook.md`.)_
+- [x] `CHANGELOG.md`, semantic versioning, tagged releases. _(changelog entries are under `[0.1.0]`; `v0.1.0` tagged 2026-11-24.)_
 - [x] Runbook: common failures (rate limits, key rotation), how to read traces. _(`docs/runbook.md`; written from the code, not from live operations.)_
 
 ---
@@ -143,7 +143,7 @@ Everything before this phase was tested against fake models only. This phase use
 - [ ] Review Groq's usage, data-retention and acceptable-use policies for mental-health-adjacent use (see `docs/privacy.md`). _(Manual; not done.)_
 - [ ] Add the `GROQ_API_KEY` repo secret so `eval.yml` can run. _(CI itself passes on every push; the secret is yours to add.)_
 - [x] `docker build .`, run the container and confirm the health check. _(Done 2026-11-24: 314 MB image, healthy, runs as uid 10001, auth enforced, live chat and crisis path work, JSON logs and metrics populated. Gotcha: `--env-file` keeps quotes, see README.)_
-- [ ] Tag `v0.1.0`: bump the version, move the changelog entries out of `[Unreleased]`.
+- [x] Tag `v0.1.0`: bump the version, move the changelog entries out of `[Unreleased]`. _(Tagged with the Groq policy review and the repo secret still open; both stay unchecked above.)_
 
 ### Phase 9 — Demo UI (Streamlit)
 A thin front end for demos and internal testing. It is not the production UI: Streamlit re-runs the script on every interaction and does not isolate users.

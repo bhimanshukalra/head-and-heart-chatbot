@@ -7,8 +7,12 @@ configuration or behavior.
 
 ## [Unreleased]
 
-Everything below is the work toward `0.1.0`. **Do not tag `0.1.0` until the live checks in the
-runbook's "Before the first release" list pass.**
+## [0.1.0] - 2026-11-24
+
+First tagged release. It was checked against the live Groq API, but two pre-release items were
+still open when it was tagged: the Groq policy review and the `GROQ_API_KEY` repository secret
+for the weekly eval workflow (see Known issues). Treat it as an early release, not as ready for
+unsupervised public use.
 
 ### Added
 - LangGraph pipeline: safety check, classifier, and therapist, logical and blended agents.

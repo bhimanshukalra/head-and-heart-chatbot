@@ -5,7 +5,8 @@ nothing here has been exercised against a live deployment yet.
 
 ## Before the first release
 
-Do these once, then tag `0.1.0` and move the `[Unreleased]` changelog entries under it.
+These were the checks before tagging `0.1.0`. `v0.1.0` was tagged with items 4 and 6 still open.
+Repeat the list before later releases.
 
 1. ~~Confirm the Groq model IDs and structured output.~~ Done 2026-11-24: the original Llama IDs
    were retired; defaults are now `openai/gpt-oss-120b` and `openai/gpt-oss-20b`. Re-check this
