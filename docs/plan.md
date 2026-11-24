@@ -16,7 +16,7 @@ Stack: Python ≥3.12, `uv`, LangGraph, LangChain, Anthropic.
 | 3 | Classifier has no error handling | One API/parse failure crashes the whole loop. |
 | 4 | `state.get("message_type", "logical")` default is unreachable (key always present, may be `None`) | `None` silently falls through to logical. |
 | 5 | `message_type` persists across turns in the loop's `state` | Stale value; harmless today, fragile later. |
-| 6 | Model `claude-3-5-sonnet-latest` is outdated/deprecated | Move to a current model ID, configurable. |
+| 6 | Model `claude-3-5-sonnet-latest` is outdated/deprecated (project now uses Groq) | Move to a current model ID, configurable. |
 | 7 | `print(last_message.content)` assumes `str` | Content can be a list of blocks. |
 | 8 | Reply is appended as a raw dict, then read as an object | Works via coercion, but inconsistent; return `AIMessage`. |
 
@@ -76,9 +76,9 @@ head-and-heart-chatbot/
 ## 3. Phased roadmap
 
 ### Phase 0 — Project foundation
-- [ ] Add dependencies via `uv add`: `langgraph`, `langchain`, `langchain-anthropic`, `python-dotenv`, `pydantic-settings`, `tenacity`; dev: `pytest`, `pytest-asyncio`, `ruff`, `mypy`, `pre-commit`.
+- [ ] Add dependencies via `uv add`: `langgraph`, `langchain`, `langchain-groq`, `python-dotenv`, `pydantic-settings`, `tenacity`; dev: `pytest`, `pytest-asyncio`, `ruff`, `mypy`, `pre-commit`.
 - [ ] Restructure into `src/head_and_heart/` package; keep `main.py` as thin entrypoint (or `[project.scripts]` console command).
-- [ ] `.env.example` (`ANTHROPIC_API_KEY`, `MODEL_NAME`, `LOG_LEVEL`); ensure `.env` in `.gitignore`.
+- [ ] `.env.example` (`GROQ_API_KEY`, `LLM_PROVIDER`, `MODEL_NAME`, `LOG_LEVEL`); ensure `.env` in `.gitignore`.
 - [ ] `config.py` with `pydantic-settings`; fail fast if API key missing.
 - [ ] Ruff + mypy config in `pyproject.toml`; pre-commit hooks.
 
