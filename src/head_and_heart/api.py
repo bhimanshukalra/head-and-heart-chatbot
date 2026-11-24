@@ -34,6 +34,7 @@ GENERIC_ERROR = "Something went wrong. Please try again."
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1)
     thread_id: str | None = Field(default=None, pattern=THREAD_ID_PATTERN)
+    debug: bool = Field(default=False, description="Include routing details in the meta event.")
 
 
 class RateLimiter:
@@ -67,6 +68,20 @@ def parse_api_keys(raw: str) -> dict[str, str]:
             raise ValueError("API_KEYS must look like 'user:key,user2:key2'.")
         keys[key] = user
     return keys
+
+
+async def _meta(graph: Any, config: RunnableConfig, debug: bool) -> dict[str, Any] | None:
+    """Non-sensitive facts about how the turn was handled, read from the checkpoint."""
+    try:
+        values = (await graph.aget_state(config)).values
+    except Exception:
+        logger.warning("Could not read turn metadata", exc_info=True)
+        return None
+    meta: dict[str, Any] = {"crisis": values.get("safety") == "crisis"}
+    if debug:
+        meta["message_type"] = values.get("message_type")
+        meta["confidence"] = values.get("confidence")
+    return meta
 
 
 def _sse(event: str, data: dict[str, Any]) -> str:
@@ -144,6 +159,8 @@ def create_app(settings: Settings, graph: Any | None = None) -> FastAPI:
             try:
                 async for text in astream_reply(current_graph, message, config):
                     yield _sse("token", {"text": text})
+                if (meta := await _meta(current_graph, config, body.debug)) is not None:
+                    yield _sse("meta", meta)
                 yield _sse("done", {"thread_id": thread_id})
                 CHAT_REQUESTS.labels("ok").inc()
             except Exception:

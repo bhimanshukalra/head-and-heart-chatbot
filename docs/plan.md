@@ -147,12 +147,12 @@ Everything so far is tested against fake models only. This phase needs a real `G
 
 ### Phase 9 — Demo UI (Streamlit)
 A thin front end for demos and internal testing. It is not the production UI: Streamlit re-runs the script on every interaction and does not isolate users.
-- [ ] Add `streamlit` as an optional dependency group (not in the core install).
-- [ ] `demo/app.py`: chat box with streaming, calling the existing `/chat` SSE endpoint (preferred, so auth, rate limits and safety all apply) or the graph directly.
-- [ ] Show the not-a-therapist disclaimer, show crisis replies clearly, and keep conversations in memory only (no persistence by default).
-- [ ] Per-session `thread_id` in `st.session_state`; a "New conversation" button that calls `DELETE /threads/{id}`.
-- [ ] Optional debug panel (off by default) showing the route taken and the classifier confidence, never raw logs.
-- [ ] README section: how to run it locally; note that it must not be exposed publicly as-is.
+- [x] Add `streamlit` as an optional dependency group (not in the core install).
+- [x] `demo/app.py`: chat box with streaming, calling the existing `/chat` SSE endpoint (preferred, so auth, rate limits and safety all apply) or the graph directly. _(calls `/chat`; `demo/client.py` is tested end to end against the real app.)_
+- [x] Show the not-a-therapist disclaimer, show crisis replies clearly, and keep conversations in memory only (no persistence by default). _(crisis flag comes from a new `meta` SSE event.)_
+- [x] Per-session `thread_id` in `st.session_state`; a "New conversation" button that calls `DELETE /threads/{id}`.
+- [x] Optional debug panel (off by default) showing the route taken and the classifier confidence, never raw logs. _(debug panel uses the new `debug` request flag.)_
+- [x] README section: how to run it locally; note that it must not be exposed publicly as-is. _(only tested headlessly with Streamlit's AppTest; not viewed in a browser.)_
 
 ### Phase 10 — Hardening for real users (later)
 Known limitations from the earlier phases, to pick up once Phase 8 passes and there is a real audience.

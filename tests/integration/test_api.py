@@ -174,3 +174,19 @@ def test_default_lifespan_builds_graph(
         r = c.post("/chat", json={"message": "hi", "thread_id": "p"}, headers=HEADERS_A)
         assert "LOGICAL" in r.text
         assert c.delete("/threads/p", headers=HEADERS_A).status_code == 204
+
+
+def test_meta_event_reports_crisis_and_hides_routing_by_default(make_client: Any) -> None:
+    with make_client() as c:
+        normal = c.post("/chat", json={"message": "hi"}, headers=HEADERS_A)
+        crisis = c.post("/chat", json={"message": "I want to kill myself"}, headers=HEADERS_A)
+    assert dict(_events(normal.text))["meta"] == {"crisis": False}
+    assert dict(_events(crisis.text))["meta"] == {"crisis": True}
+
+
+def test_debug_flag_adds_routing_details(make_client: Any) -> None:
+    with make_client() as c:
+        r = c.post("/chat", json={"message": "hi", "debug": True}, headers=HEADERS_A)
+    meta = dict(_events(r.text))["meta"]
+    assert meta["message_type"] == "logical"
+    assert meta["confidence"] == 0.95

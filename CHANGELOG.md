@@ -23,6 +23,8 @@ runbook's "Before the first release" list pass.**
 - Test suite (98% coverage, 85% gate), labeled classifier and safety datasets, opt-in live
   classifier eval, and GitHub Actions workflows.
 - README, privacy notes and runbook.
+- Optional Streamlit demo UI (`uv sync --extra demo`) and a `meta` SSE event (`crisis`, plus
+  `message_type` and `confidence` when `debug` is requested).
 
 ### Changed
 - Provider is Groq (`langchain-groq`) instead of Anthropic.

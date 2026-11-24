@@ -92,7 +92,7 @@ API_KEYS="alice:$(openssl rand -hex 24)" uv run uvicorn head_and_heart.api:app_f
 
 | Endpoint | Description |
 |----------|-------------|
-| `POST /chat` | Body `{"message": "...", "thread_id": "optional"}`. Streams Server-Sent Events: `token` (`{"text"}`), then `done` (`{"thread_id"}`), or `error`. Needs `X-API-Key`. |
+| `POST /chat` | Body `{"message": "...", "thread_id": "optional"}`. Streams Server-Sent Events: `token` (`{"text"}`), then `meta` (`{"crisis": bool}`) and `done` (`{"thread_id"}`), or `error`. Add `"debug": true` to also get `message_type` and `confidence` in `meta`. Needs `X-API-Key`. |
 | `DELETE /threads/{thread_id}` | Deletes that user's stored thread. Needs `X-API-Key`. |
 | `GET /health` | Liveness. No auth. |
 | `GET /metrics` | Prometheus metrics. No auth, so restrict it at the network level. |
@@ -115,6 +115,24 @@ docker run --rm -p 8000:8000 -e GROQ_API_KEY=... -e API_KEYS=alice:<key> head-an
 
 The image runs as a non-root user, logs JSON, and has a health check. Mount a volume at `/data`
 and set `PERSIST_HISTORY=true` to keep conversations. The image has not been built or run yet.
+
+## Demo UI (Streamlit)
+
+A small chat front end for demos and internal testing. It calls the HTTP API, so auth, rate
+limits and safety checks all apply. It is **not** meant for real users: Streamlit re-runs the
+script on every interaction and does not isolate users, so do not expose it publicly as is.
+
+```bash
+uv sync --extra demo
+API_KEYS="alice:secret" uv run uvicorn head_and_heart.api:app_factory --factory   # terminal 1
+DEMO_API_KEY=secret uv run streamlit run demo/app.py                              # terminal 2
+```
+
+It shows the not-a-therapist notice, streams replies, flags crisis replies with an emergency
+banner, keeps the conversation in browser-session memory only, and has a "New conversation"
+button that also deletes the server-side thread. The sidebar toggle "Show routing details"
+displays the classification and confidence. `DEMO_API_URL` and `DEMO_API_KEY` set the defaults.
+The UI has only been tested headlessly, not looked at in a browser.
 
 ## Development
 
@@ -142,6 +160,7 @@ src/head_and_heart/
   api.py          FastAPI service
   cli.py          command-line interface
   observability.py, logging.py   metrics, JSON logs, PII redaction
+demo/             optional Streamlit demo UI (extra: `demo`)
 tests/            unit, integration, and evals (datasets in tests/evals/)
 docs/             plan.md, privacy.md, runbook.md
 ```

@@ -31,6 +31,12 @@ dev = [
 [project.scripts]
 head-and-heart = "head_and_heart.cli:main"
 
+[project.optional-dependencies]
+demo = [
+    "httpx>=0.28.1",
+    "streamlit>=1.67.0",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -40,7 +46,7 @@ packages = ["src/head_and_heart"]
 
 [tool.ruff]
 line-length = 100
-src = ["src", "tests"]
+src = ["src", "tests", "demo"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
@@ -49,7 +55,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-files = ["src", "tests"]
+files = ["src", "tests", "demo/client.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -64,3 +70,7 @@ source = ["head_and_heart"]
 [tool.coverage.report]
 fail_under = 85
 show_missing = true
+
+[[tool.mypy.overrides]]
+module = ["streamlit.*"]
+ignore_missing_imports = true  # streamlit is an optional extra, absent in CI
