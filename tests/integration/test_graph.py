@@ -67,3 +67,30 @@ def test_agent_receives_full_history(make_classifier_llm: Any) -> None:
     g.invoke({"messages": [HumanMessage("what is my name?")]}, cfg)
     contents = [m.content for m in seen[-1]]
     assert "my name is Sam" in contents
+
+
+def test_stream_reply_yields_agent_tokens_only(
+    make_classifier_llm: Any, make_agent_llm: Any
+) -> None:
+    from head_and_heart.chat import stream_reply
+
+    g = _graph(make_classifier_llm("emotional"), make_agent_llm, checkpointer=MemorySaver())
+    cfg: RunnableConfig = {"configurable": {"thread_id": "s1"}}
+    assert "".join(stream_reply(g, "I feel sad", cfg)).strip() == "THERAPIST"
+
+
+def test_sqlite_checkpoint_persists_across_graph_instances(
+    make_classifier_llm: Any, make_agent_llm: Any, tmp_path: Any
+) -> None:
+    import sqlite3
+
+    from langgraph.checkpoint.sqlite import SqliteSaver
+
+    db = str(tmp_path / "t.sqlite")
+    cfg: RunnableConfig = {"configurable": {"thread_id": "p1"}}
+    for text, expected in [("first", 2), ("second", 4)]:
+        conn = sqlite3.connect(db, check_same_thread=False)
+        g = _graph(make_classifier_llm("logical"), make_agent_llm, checkpointer=SqliteSaver(conn))
+        out = g.invoke({"messages": [HumanMessage(text)]}, cfg)
+        assert len(out["messages"]) == expected
+        conn.close()

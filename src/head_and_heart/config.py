@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     )
     request_timeout_s: float = Field(default=30.0, gt=0)
     max_retries: int = Field(default=3, ge=0)
+    max_context_tokens: int = Field(
+        default=6000, gt=0, description="Approximate token budget for history sent to the model."
+    )
+    checkpoint_db_path: str = Field(default="chat_history.sqlite", description="SQLite file.")
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
 

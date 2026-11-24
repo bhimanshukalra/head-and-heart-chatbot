@@ -1,26 +1,46 @@
 """Response agent nodes (therapist and logical)."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from typing import Any
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import BaseMessage, SystemMessage, trim_messages
+from langchain_core.messages.utils import count_tokens_approximately
 
 from head_and_heart.prompts import LOGICAL_PROMPT, THERAPIST_PROMPT
 from head_and_heart.state import State
 
+DEFAULT_MAX_CONTEXT_TOKENS = 6000
 
-def _make_agent(llm: BaseChatModel, system_prompt: str) -> Callable[[State], dict[str, Any]]:
+
+def _make_agent(
+    llm: BaseChatModel, system_prompt: str, max_tokens: int
+) -> Callable[[State], dict[str, Any]]:
     def agent(state: State) -> dict[str, Any]:
-        reply = llm.invoke([SystemMessage(system_prompt), *state["messages"]])
+        history: Sequence[BaseMessage] = trim_messages(
+            state["messages"],
+            max_tokens=max_tokens,
+            token_counter=count_tokens_approximately,
+            strategy="last",
+            start_on="human",
+            allow_partial=False,
+        )
+        # Always keep the latest message even if it alone exceeds the budget.
+        if not history:
+            history = state["messages"][-1:]
+        reply = llm.invoke([SystemMessage(system_prompt), *history])
         return {"messages": [reply]}
 
     return agent
 
 
-def make_therapist(llm: BaseChatModel) -> Callable[[State], dict[str, Any]]:
-    return _make_agent(llm, THERAPIST_PROMPT)
+def make_therapist(
+    llm: BaseChatModel, max_tokens: int = DEFAULT_MAX_CONTEXT_TOKENS
+) -> Callable[[State], dict[str, Any]]:
+    return _make_agent(llm, THERAPIST_PROMPT, max_tokens)
 
 
-def make_logical(llm: BaseChatModel) -> Callable[[State], dict[str, Any]]:
-    return _make_agent(llm, LOGICAL_PROMPT)
+def make_logical(
+    llm: BaseChatModel, max_tokens: int = DEFAULT_MAX_CONTEXT_TOKENS
+) -> Callable[[State], dict[str, Any]]:
+    return _make_agent(llm, LOGICAL_PROMPT, max_tokens)

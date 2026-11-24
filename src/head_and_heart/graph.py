@@ -7,7 +7,7 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from head_and_heart.nodes.agents import make_logical, make_therapist
+from head_and_heart.nodes.agents import DEFAULT_MAX_CONTEXT_TOKENS, make_logical, make_therapist
 from head_and_heart.nodes.classifier import DEFAULT_TYPE, make_classifier
 from head_and_heart.state import State
 
@@ -24,11 +24,12 @@ def build_graph(
     therapist_llm: BaseChatModel,
     logical_llm: BaseChatModel,
     checkpointer: BaseCheckpointSaver[Any] | None = None,
+    max_context_tokens: int = DEFAULT_MAX_CONTEXT_TOKENS,
 ) -> CompiledStateGraph[State, None, State, State]:
     builder = StateGraph(State)
     builder.add_node("classifier", make_classifier(classifier_llm))  # type: ignore[call-overload]
-    builder.add_node("therapist", make_therapist(therapist_llm))  # type: ignore[call-overload]
-    builder.add_node("logical", make_logical(logical_llm))  # type: ignore[call-overload]
+    builder.add_node("therapist", make_therapist(therapist_llm, max_context_tokens))  # type: ignore[call-overload]
+    builder.add_node("logical", make_logical(logical_llm, max_context_tokens))  # type: ignore[call-overload]
 
     builder.add_edge(START, "classifier")
     builder.add_conditional_edges(

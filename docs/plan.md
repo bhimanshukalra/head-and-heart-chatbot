@@ -76,27 +76,27 @@ head-and-heart-chatbot/
 ## 3. Phased roadmap
 
 ### Phase 0 — Project foundation
-- [ ] Add dependencies via `uv add`: `langgraph`, `langchain`, `langchain-groq`, `python-dotenv`, `pydantic-settings`, `tenacity`; dev: `pytest`, `pytest-asyncio`, `ruff`, `mypy`, `pre-commit`.
-- [ ] Restructure into `src/head_and_heart/` package; keep `main.py` as thin entrypoint (or `[project.scripts]` console command).
-- [ ] `.env.example` (`GROQ_API_KEY`, `LLM_PROVIDER`, `MODEL_NAME`, `LOG_LEVEL`); ensure `.env` in `.gitignore`.
-- [ ] `config.py` with `pydantic-settings`; fail fast if API key missing.
-- [ ] Ruff + mypy config in `pyproject.toml`; pre-commit hooks.
+- [x] Add dependencies via `uv add`: `langgraph`, `langchain`, `langchain-groq`, `python-dotenv`, `pydantic-settings`, `tenacity`; dev: `pytest`, `pytest-asyncio`, `ruff`, `mypy`, `pre-commit`. _(`tenacity` added but unused; Groq client retries cover Phase 2.)_
+- [x] Restructure into `src/head_and_heart/` package; keep `main.py` as thin entrypoint (or `[project.scripts]` console command).
+- [x] `.env.example` (`GROQ_API_KEY`, `LLM_PROVIDER`, `MODEL_NAME`, `LOG_LEVEL`); ensure `.env` in `.gitignore`.
+- [x] `config.py` with `pydantic-settings`; fail fast if API key missing.
+- [x] Ruff + mypy config in `pyproject.toml`; pre-commit hooks. _(pre-commit config written; hooks not installed, versions may need `pre-commit autoupdate`.)_
 
 ### Phase 1 — Fix correctness (highest value, smallest diff)
-- [ ] Pass **full (trimmed) history** to agents: `[system] + state["messages"]`.
-- [ ] Replace `router` node with conditional-edge function returning `"therapist" | "logical"`; remove `next`.
-- [ ] Return `AIMessage` from agents; read content safely (`message.text()` / join text blocks).
-- [ ] Use a current model ID from config; set `temperature` per node (classifier `0`, therapist ~0.7, logical ~0.2).
-- [ ] Reset/overwrite `message_type` each turn; typed `Literal` field in `State`.
-- [ ] Wrap classifier in try/except; on failure default to `logical` and log a warning.
+- [x] Pass **full (trimmed) history** to agents: `[system] + state["messages"]`.
+- [x] Replace `router` node with conditional-edge function returning `"therapist" | "logical"`; remove `next`.
+- [x] Return `AIMessage` from agents; read content safely (`message.text()` / join text blocks).
+- [x] Use a current model ID from config; set `temperature` per node (classifier `0`, therapist ~0.7, logical ~0.2). _(Groq model IDs not yet verified against a live key.)_
+- [x] Reset/overwrite `message_type` each turn; typed `Literal` field in `State`.
+- [x] Wrap classifier in try/except; on failure default to `logical` and log a warning.
 
 ### Phase 2 — Reliability
-- [ ] `max_retries` + `timeout` on the model; `tenacity` for backoff on rate-limit/5xx.
-- [ ] Graceful CLI error handling (`KeyboardInterrupt`, `EOFError`, API errors → friendly message, loop continues).
-- [ ] Context management: `trim_messages(max_tokens=…, strategy="last")`; optional rolling summary node for long chats.
-- [ ] Persistence: `SqliteSaver` with `thread_id` so sessions survive restarts.
-- [ ] Streaming responses (`graph.stream(..., stream_mode="messages")`) for better UX.
-- [ ] Use async (`ainvoke`/`astream`) in service path.
+- [x] `max_retries` + `timeout` on the model; `tenacity` for backoff on rate-limit/5xx. _(built-in client retries via `max_retries`; `tenacity` not used.)_
+- [x] Graceful CLI error handling (`KeyboardInterrupt`, `EOFError`, API errors → friendly message, loop continues).
+- [x] Context management: `trim_messages(max_tokens=…, strategy="last")`; optional rolling summary node for long chats. _(trimming done; rolling summary skipped.)_
+- [x] Persistence: `SqliteSaver` with `thread_id` so sessions survive restarts.
+- [x] Streaming responses (`graph.stream(..., stream_mode="messages")`) for better UX.
+- [ ] Use async (`ainvoke`/`astream`) in service path. _(deferred to Phase 5.)_
 
 ### Phase 3 — Quality of routing & responses
 - [ ] Add `mixed` class + confidence; blended agent (empathize first, then practical steps).
